@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
 import { ProblemSection } from "@/components/problem-section";
@@ -24,60 +24,50 @@ export default function HomePage() {
   const [accessModalOpen, setAccessModalOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        if (accessModalOpen) return;
+        setCommandPaletteOpen((open) => !open);
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, [accessModalOpen]);
+
+  const openAccessModal = () => {
+    setCommandPaletteOpen(false);
+    setAccessModalOpen(true);
+  };
+
   return (
-    <main className="min-h-screen bg-[#08090b] text-[#f3f4f6] relative selection:bg-sky-500/25 selection:text-white">
-      {/* Sticky Elevated Navigation */}
+    <main
+      id="top"
+      className="min-h-screen bg-[#08090b] text-[#f3f4f6] relative selection:bg-sky-500/25 selection:text-white"
+    >
       <Navbar
-        onOpenAccessModal={() => setAccessModalOpen(true)}
+        onOpenAccessModal={openAccessModal}
         onOpenCommandPalette={() => setCommandPaletteOpen(true)}
       />
 
-      {/* Hero Section & Embedded Live Command Center Demo */}
-      <Hero onOpenAccessModal={() => setAccessModalOpen(true)} />
-
-      {/* Problem: Fragmented Development Workflow */}
+      <Hero onOpenAccessModal={openAccessModal} />
       <ProblemSection />
-
-      {/* The Difference: Understand, Act, Control */}
       <DifferenceSection />
-
-      {/* Persistent Project Brain & Codebase Map */}
       <ProjectBrain />
-
-      {/* Agent Execution Pipeline: Ask -> Plan -> Execute -> Verify -> Ship */}
       <AgentExecution />
-
-      {/* Live Agent Terminal Stream */}
       <AgentTerminal />
-
-      {/* Human Control & Autonomy Boundaries Matrix */}
       <AutonomySection />
-
-      {/* Phone Command Center & Voice Control */}
       <MobileCommandCenter />
-
-      {/* Collaboration: Developers & Agents Shared State */}
       <CollaborationSection />
-
-      {/* End-to-End "Without Your Laptop" Climax Story */}
       <ShipSection />
-
-      {/* Technical Architecture Blueprint */}
       <ArchitectureSection />
-
-      {/* Model-Agnostic Engine Layer */}
       <ModelSection />
-
-      {/* 4 Focused Real-World Use Cases */}
       <UseCases />
-
-      {/* Final Command Center CTA */}
-      <FinalCta onOpenAccessModal={() => setAccessModalOpen(true)} />
-
-      {/* Minimal Footer */}
+      <FinalCta onOpenAccessModal={openAccessModal} />
       <Footer />
 
-      {/* Interactive Global Modals */}
       <AccessModal
         isOpen={accessModalOpen}
         onClose={() => setAccessModalOpen(false)}
@@ -86,7 +76,7 @@ export default function HomePage() {
       <CommandPalette
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
-        onOpenAccessModal={() => setAccessModalOpen(true)}
+        onOpenAccessModal={openAccessModal}
       />
     </main>
   );
