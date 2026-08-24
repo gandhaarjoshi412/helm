@@ -22,21 +22,17 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://helm.dev"),
   title: "HELM — AI Developer Command Center",
   description:
-    "HELM is an AI-native developer command center for understanding codebases, directing software agents, collaborating on projects, and shipping software from desktop or phone.",
+    "HELM is an interactive hackathon prototype for a developer command center spanning desktop and mobile workflows.",
   keywords: [
     "AI Developer Command Center",
-    "Autonomous Software Agents",
-    "Codebase Intelligence",
-    "Developer Infrastructure",
-    "Agentic IDE",
-    "DevOps Automation",
+    "Developer Tools",
     "Remote Development Control",
+    "iQOO Hackathon 2026",
     "HELM",
   ],
-  authors: [{ name: "HELM Core Systems" }],
+  authors: [{ name: "HELM" }],
   creator: "HELM",
   publisher: "HELM",
   robots: {
@@ -45,27 +41,16 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "en_US",
-    url: "https://helm.dev",
     title: "HELM — AI Developer Command Center",
     description:
-      "Your development environment, under control. Persistent codebase intelligence, autonomous agent orchestration, and remote ship control.",
+      "An interactive developer command-center prototype for desktop and mobile.",
     siteName: "HELM",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "HELM AI Developer Command Center",
-      },
-    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "HELM — AI Developer Command Center",
     description:
-      "Your development environment, under control. Understand, direct, verify, and ship from one command plane.",
-    images: ["/og-image.png"],
+      "An interactive developer command-center prototype for desktop and mobile.",
   },
   icons: {
     icon: [
