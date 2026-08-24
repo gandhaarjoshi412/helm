@@ -1,0 +1,379 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap');
+@import "tailwindcss";
+
+code,
+pre,
+.font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+@layer base {
+  :root {
+    --background: #000000;
+    --foreground: #f3f4f6;
+    --surface-1: #050505;
+    --surface-2: #0a0a0a;
+    --surface-3: #121212;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-highlight: rgba(255, 255, 255, 0.16);
+    --accent-green: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-cyan: #38bdf8;
+  }
+
+  body {
+    background-color: #000000;
+    color: #f3f4f6;
+  }
+
+  html.light {
+    --background: #ffffff;
+    --foreground: #0f172a;
+    --surface-1: #ffffff;
+    --surface-2: #f8fafc;
+    --surface-3: #f1f5f9;
+    --border-subtle: rgba(15, 23, 42, 0.1);
+    --border-highlight: rgba(15, 23, 42, 0.2);
+    color-scheme: light;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  html.light body,
+  html.light main {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Typography adaptation for Light Mode */
+  html.light h1,
+  html.light h2,
+  html.light h3,
+  html.light h4,
+  html.light h5,
+  html.light h6 {
+    color: #0f172a !important;
+  }
+
+  html.light p {
+    color: #334155;
+  }
+
+  html.light .text-white {
+    color: #0f172a !important;
+  }
+
+  html.light .text-zinc-100,
+  html.light .text-zinc-200 {
+    color: #1e293b !important;
+  }
+
+  html.light .text-zinc-300,
+  html.light .text-zinc-400 {
+    color: #475569 !important;
+  }
+
+  html.light .text-zinc-500 {
+    color: #64748b !important;
+  }
+
+  /* All Non-Hero Sections in Light Mode: Pure Plain White Background */
+  html.light section:not(.hero-section),
+  html.light section:not(.hero-section).bg-black,
+  html.light section:not(.hero-section) .bg-black,
+  html.light footer,
+  html.light footer.bg-black {
+    background-color: #ffffff !important;
+  }
+
+  /* Main Animation Hero Section: Always Pitch Black in Light & Dark Mode */
+  html.light .hero-section,
+  html.light .hero-section.bg-black,
+  html.light .hero-section .bg-black {
+    background-color: #000000 !important;
+  }
+
+  html.light .hero-section h1,
+  html.light .hero-section h1 *,
+  html.light .hero-section .text-white {
+    color: #ffffff !important;
+  }
+
+  html.light .hero-section p,
+  html.light .hero-section .text-zinc-400 {
+    color: #a1a1aa !important;
+  }
+
+  html.light .bg-\[\#0e1117\],
+  html.light .bg-\[\#0e1117\]\/90,
+  html.light .bg-\[\#0b0d12\],
+  html.light .bg-\[\#0c0e14\] {
+    background-color: #ffffff !important;
+  }
+
+  html.light .bg-\[\#08090b\],
+  html.light .bg-\[\#07080a\],
+  html.light .bg-\[\#08090c\],
+  html.light .bg-\[\#090b0e\],
+  html.light .bg-\[\#07090c\],
+  html.light .bg-\[\#0d0f14\],
+  html.light .bg-\[\#0a0c10\],
+  html.light .bg-\[\#0f1218\],
+  html.light .bg-\[\#0c0e13\],
+  html.light .bg-\[\#08090d\] {
+    background-color: #f8fafc !important;
+  }
+
+  html.light .bg-zinc-950,
+  html.light .bg-zinc-950\/90,
+  html.light .bg-zinc-950\/80,
+  html.light .bg-zinc-950\/60,
+  html.light .bg-zinc-900,
+  html.light .bg-zinc-900\/90,
+  html.light .bg-zinc-900\/80 {
+    background-color: #f1f5f9 !important;
+  }
+
+  /* Border adaptations */
+  html.light .border-white\/\[0\.08\],
+  html.light .border-white\/\[0\.06\],
+  html.light .border-white\/\[0\.04\],
+  html.light .border-white\/10,
+  html.light .border-white\/12,
+  html.light .border-white\/20 {
+    border-color: rgba(15, 23, 42, 0.12) !important;
+  }
+
+  /* Inputs, Selects & Form Controls */
+  html.light input,
+  html.light select,
+  html.light textarea {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  html.light input::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  /* Code blocks, Terminals & Modals in Light Mode */
+  html.light pre,
+  html.light code {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+  }
+
+  html.light .bg-\[\#0a0c10\],
+  html.light .bg-\[\#08090d\],
+  html.light .bg-\[\#07080c\],
+  html.light .bg-\[\#07080a\] {
+    background-color: #f8fafc !important;
+  }
+
+  html.light .glass-panel {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  html.light .tech-grid {
+    background-image:
+      linear-gradient(to right, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+  }
+
+  html.light ::-webkit-scrollbar-track {
+    background: #ffffff;
+  }
+
+  html.light ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+  }
+
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+    background-color: #000000;
+    color: #f3f4f6;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  body {
+    background-color: #000000;
+    color: #f3f4f6;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  ::selection {
+    background-color: rgba(56, 189, 248, 0.25);
+    color: #ffffff;
+  }
+}
+
+/* Technical grid patterns */
+.tech-grid {
+  background-size: 32px 32px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+}
+
+.tech-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Glass Refraction & Borders */
+.glass-panel {
+  background: rgba(15, 17, 22, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+    0 20px 40px -15px rgba(0, 0, 0, 0.6);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(21, 24, 32, 0.85);
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateY(-3px);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
+    0 0 25px -5px rgba(56, 189, 248, 0.15),
+    0 24px 48px -12px rgba(0, 0, 0, 0.8);
+}
+
+/* Shimmer Animation on Interactive Elements */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.06) 20%,
+      rgba(255, 255, 255, 0.15) 60%,
+      rgba(255, 255, 255, 0));
+  animation: shimmer 3s infinite;
+  pointer-events: none;
+}
+
+/* Floating Ambient Motion */
+@keyframes floatSlow {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+.animate-float {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #08090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #232734;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
+}
+
+/* Scanline / Terminal CRT pulse effect */
+@keyframes terminalScan {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(1000%);
+  }
+}
+
+.scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.15), transparent);
+  animation: terminalScan 8s linear infinite;
+  pointer-events: none;
+}
+
+/* Pulse Glows */
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+.pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
