@@ -121,7 +121,7 @@ const widgets: FloatingCodeWidgetData[] = [
       "  def select_optimal_engine(self, task_complexity):",
       "    return 'claude-3-5-sonnet' if complexity > 0.8 else 'gpt-4o'",
     ],
-    position: "hidden lg:block left-[32%] top-[4%]",
+    position: "hidden lg:block left-[10%] xl:left-[15%] top-[1.5%] md:top-[2%]",
     floatDelay: 0.5,
     floatDuration: 7.2,
   },
@@ -136,7 +136,7 @@ const widgets: FloatingCodeWidgetData[] = [
       "+ }), { retries: 5, delay: 200 });",
       "- const res = await stripe.charges.create({ amount });",
     ],
-    position: "hidden lg:block right-[32%] top-[4%]",
+    position: "hidden lg:block right-[10%] xl:right-[15%] top-[1.5%] md:top-[2%]",
     floatDelay: 1.8,
     floatDuration: 8.5,
   },
@@ -302,12 +302,19 @@ export function FloatingCodeBackground({ className }: { className?: string }) {
   const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
 
   useEffect(() => {
+    let animationFrameId: number;
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = requestAnimationFrame(() => {
+        setMousePos({ x: e.clientX, y: e.clientY });
+      });
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   return (

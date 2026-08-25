@@ -80,15 +80,15 @@ export function HeroCommandCenter() {
   return (
     <div className="w-full relative select-none">
       {/* Interactive Step Scrubber Bar in Pill Capsule Design */}
-      <div className="relative flex flex-wrap items-center justify-between gap-3 mb-4 px-4 py-2.5 rounded-2xl bg-zinc-950/40 dark:bg-zinc-950/40 light:bg-white/80 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 dark:border-white/20 light:border-slate-300 shadow-[0_16px_40px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.3)] font-mono text-xs text-zinc-300 transition-all duration-300 overflow-hidden">
+      <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 px-3 sm:px-4 py-2.5 rounded-2xl bg-zinc-950/60 dark:bg-zinc-950/60 light:bg-white/90 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 dark:border-white/20 light:border-slate-300 shadow-[0_16px_40px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.3)] font-mono text-xs text-zinc-300 transition-all duration-300 overflow-hidden">
         {/* Top Rim Glass Sheen Highlight */}
         <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
-        <div className="flex flex-wrap items-center gap-2 z-10">
-          <span className="text-[11px] uppercase tracking-wider font-bold text-zinc-300 dark:text-zinc-300 light:text-slate-700 mr-1 hidden sm:inline">
+        <div className="flex items-center gap-2 z-10 overflow-x-auto no-scrollbar w-full sm:w-auto">
+          <span className="text-[11px] uppercase tracking-wider font-bold text-zinc-300 dark:text-zinc-300 light:text-slate-700 mr-1 hidden sm:inline shrink-0">
             INTERACTIVE CYCLE:
           </span>
-          <div className="relative inline-flex flex-wrap items-center gap-1 p-1 rounded-full bg-zinc-950/60 dark:bg-zinc-950/60 light:bg-slate-100 border border-white/15 dark:border-white/15 light:border-slate-300 backdrop-blur-md">
+          <div className="relative inline-flex items-center gap-1 p-1 rounded-xl sm:rounded-full bg-zinc-950/80 dark:bg-zinc-950/80 light:bg-slate-100 border border-white/15 dark:border-white/15 light:border-slate-300 backdrop-blur-md overflow-x-auto no-scrollbar shrink-0 max-w-full">
             {[
               { label: "1. Investigate", id: 0 },
               { label: "2. Review Ready", id: 1 },
@@ -105,7 +105,7 @@ export function HeroCommandCenter() {
                     setIsPlaying(false);
                   }}
                   className={cn(
-                    "relative px-4 py-1.5 text-[11px] sm:text-xs font-mono font-medium tracking-wide transition-all duration-300 cursor-pointer rounded-full select-none flex flex-col items-center justify-center group z-10",
+                    "relative px-3 sm:px-4 py-1.5 text-[10.5px] sm:text-xs font-mono font-medium tracking-wide transition-all duration-300 cursor-pointer rounded-lg sm:rounded-full select-none flex flex-col items-center justify-center group z-10 shrink-0 whitespace-nowrap",
                     isActive
                       ? "text-white dark:text-white light:text-slate-900 font-semibold drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]"
                       : "text-zinc-400 dark:text-zinc-400 light:text-slate-600 hover:text-zinc-100 dark:hover:text-zinc-100 light:hover:text-slate-900"
@@ -123,7 +123,7 @@ export function HeroCommandCenter() {
                         damping: 30,
                         mass: 0.8,
                       }}
-                      className="absolute inset-0 rounded-full bg-white/[0.14] dark:bg-white/[0.14] light:bg-slate-200/80 border border-white/30 dark:border-white/30 light:border-slate-400/50 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.12),inset_0_1px_0_rgba(255,255,255,0.4)] -z-0"
+                      className="absolute inset-0 rounded-lg sm:rounded-full bg-white/[0.14] dark:bg-white/[0.14] light:bg-slate-200/80 border border-white/30 dark:border-white/30 light:border-slate-400/50 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.12),inset_0_1px_0_rgba(255,255,255,0.4)] -z-0"
                     />
                   )}
                 </button>
