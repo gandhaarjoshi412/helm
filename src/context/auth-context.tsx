@@ -25,6 +25,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
 
   useEffect(() => {
+    // Purge any stale demo user session from browser localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("kodium_demo_user");
+    }
+
     if (!supabase) {
       setLoading(false);
       return;
