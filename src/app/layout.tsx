@@ -71,7 +71,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2308090B'/><defs><linearGradient id='k' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%237C3AED'/><stop offset='50%25' stop-color='%236366F1'/><stop offset='100%25' stop-color='%2338BDF8'/></linearGradient></defs><path d='M 28 80 V 27 L 44 14 V 42 L 37 49 L 44 56 V 80 H 28 Z' fill='url(%23k)'/><path d='M 40 44 L 78 26 V 40 L 48 57 L 40 44 Z' fill='url(%23k)'/><path d='M 48 57 L 78 78 H 63 L 40 54 L 48 57 Z' fill='url(%23k)'/></svg>",
+        url: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2308090B'/><defs><linearGradient id='k' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%2394A3B8'/><stop offset='35%25' stop-color='%23E2E8F0'/><stop offset='70%25' stop-color='%23FFFFFF'/><stop offset='100%25' stop-color='%23CBD5E1'/></linearGradient></defs><path d='M 28 80 V 27 L 44 14 V 42 L 37 49 L 44 56 V 80 H 28 Z' fill='url(%23k)'/><path d='M 40 44 L 78 26 V 40 L 48 57 L 40 44 Z' fill='url(%23k)'/><path d='M 48 57 L 78 78 H 63 L 40 54 L 48 57 Z' fill='url(%23k)'/></svg>",
         type: "image/svg+xml",
       },
     ],

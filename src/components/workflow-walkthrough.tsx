@@ -293,20 +293,20 @@ export function WorkflowWalkthrough() {
                 <div className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
                   CONTINUOUS WORKFLOW PROGRESSION
                 </div>
-                <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-zinc-400 font-bold">
-                  <span className={cn(activeStep >= 0 && "text-white")}>CONNECT</span>
-                  <span>→</span>
-                  <span className={cn(activeStep >= 1 && "text-white")}>BRAIN</span>
-                  <span>→</span>
-                  <span className={cn(activeStep >= 2 && "text-white")}>TASK</span>
-                  <span>→</span>
-                  <span className={cn(activeStep >= 4 && "text-white")}>PLAN</span>
-                  <span>→</span>
-                  <span className={cn(activeStep >= 6 && "text-white")}>EXECUTE</span>
-                  <span>→</span>
-                  <span className={cn(activeStep >= 7 && "text-white")}>VERIFY</span>
-                  <span>→</span>
-                  <span className={cn(activeStep >= 10 && "text-white")}>SHIP</span>
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap text-[10px] sm:text-[10.5px] text-zinc-400 font-bold pb-1">
+                  <span className={cn("shrink-0", activeStep >= 0 && "text-white font-bold")}>CONNECT</span>
+                  <span className="text-zinc-600 shrink-0">→</span>
+                  <span className={cn("shrink-0", activeStep >= 1 && "text-white font-bold")}>BRAIN</span>
+                  <span className="text-zinc-600 shrink-0">→</span>
+                  <span className={cn("shrink-0", activeStep >= 2 && "text-white font-bold")}>TASK</span>
+                  <span className="text-zinc-600 shrink-0">→</span>
+                  <span className={cn("shrink-0", activeStep >= 4 && "text-white font-bold")}>PLAN</span>
+                  <span className="text-zinc-600 shrink-0">→</span>
+                  <span className={cn("shrink-0", activeStep >= 6 && "text-white font-bold")}>EXECUTE</span>
+                  <span className="text-zinc-600 shrink-0">→</span>
+                  <span className={cn("shrink-0", activeStep >= 7 && "text-white font-bold")}>VERIFY</span>
+                  <span className="text-zinc-600 shrink-0">→</span>
+                  <span className={cn("shrink-0", activeStep >= 10 && "text-white font-bold")}>SHIP</span>
                 </div>
               </div>
 

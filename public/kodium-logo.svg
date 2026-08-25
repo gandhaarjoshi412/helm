@@ -2,10 +2,10 @@
   <rect width="500" height="500" fill="#000000" />
   <defs>
     <linearGradient id="kodium-logo-grad" x1="10%" y1="90%" x2="90%" y2="10%">
-      <stop offset="0%" stopColor="#7C3AED" />
-      <stop offset="35%" stopColor="#6366F1" />
-      <stop offset="70%" stopColor="#0284C7" />
-      <stop offset="100%" stopColor="#38BDF8" />
+      <stop offset="0%" stopColor="#94A3B8" />
+      <stop offset="35%" stopColor="#E2E8F0" />
+      <stop offset="70%" stopColor="#FFFFFF" />
+      <stop offset="100%" stopColor="#CBD5E1" />
     </linearGradient>
     <style>
       .kodium-text {

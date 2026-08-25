@@ -64,9 +64,9 @@ export function FloatingBottomNav() {
   const currentDisplayHref = hoveredHref || activeSection;
 
   return (
-    <div className="fixed bottom-7 left-1/2 -translate-x-1/2 z-50 px-3 max-w-[95vw] pointer-events-auto">
+    <div className="fixed bottom-4 sm:bottom-7 left-1/2 -translate-x-1/2 z-50 px-2 sm:px-3 max-w-[96vw] sm:max-w-max pointer-events-auto">
       {/* Outer Glassmorphic Container with Translucency & Specular Highlights */}
-      <div className="relative flex items-center gap-1.5 sm:gap-2 px-4 py-2.5 sm:px-5 sm:py-3 rounded-full bg-zinc-950/40 dark:bg-zinc-950/40 light:bg-white/80 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 dark:border-white/20 light:border-slate-300 shadow-[0_20px_50px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.3)] overflow-hidden">
+      <div className="relative flex items-center gap-1 sm:gap-2 px-2.5 py-1.5 sm:px-5 sm:py-3 rounded-full bg-zinc-950/80 dark:bg-zinc-950/80 light:bg-white/90 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 dark:border-white/20 light:border-slate-300 shadow-[0_20px_50px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.3)] overflow-x-auto no-scrollbar max-w-[94vw] sm:max-w-none">
         {/* Top Rim Glass Sheen Highlight */}
         <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
@@ -82,7 +82,7 @@ export function FloatingBottomNav() {
               onMouseEnter={() => setHoveredHref(link.href)}
               onMouseLeave={() => setHoveredHref(null)}
               className={cn(
-                "relative px-4 sm:px-5 py-2 text-sm sm:text-base font-medium tracking-wide transition-all duration-300 cursor-pointer rounded-full select-none flex items-center justify-center group z-10",
+                "relative px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium tracking-wide transition-all duration-300 cursor-pointer rounded-full select-none flex items-center justify-center group z-10 shrink-0 whitespace-nowrap",
                 isCurrentActive
                   ? "text-white dark:text-white light:text-slate-900 font-semibold drop-shadow-[0_0_12px_rgba(255,255,255,0.5)]"
                   : "text-zinc-400 dark:text-zinc-400 light:text-slate-600 hover:text-zinc-100 dark:hover:text-zinc-100 light:hover:text-slate-900"
