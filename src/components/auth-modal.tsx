@@ -224,20 +224,32 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
         <form onSubmit={handleSubmit} className="space-y-4">
           {tab === "signup" && (
             <div>
-              <label className="block text-[11px] font-mono text-zinc-300 mb-1.5 font-bold tracking-wider">
-                YOUR NAME / USERNAME (e.g. Prado)
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[11px] font-mono text-zinc-300 font-bold tracking-wider">
+                  USERNAME
+                </label>
+                <span className="text-[10px] font-mono text-zinc-400">
+                  Letters, numbers, & _ only
+                </span>
+              </div>
               <div className="relative">
                 <UserIcon className="absolute left-3.5 top-3 w-4 h-4 text-zinc-500" />
                 <input
                   type="text"
                   required
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Prado"
+                  onChange={(e) => {
+                    // Prevent spaces dynamically
+                    const val = e.target.value.replace(/\s+/g, "");
+                    setFullName(val);
+                  }}
+                  placeholder="Prado_28"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-950/90 border border-white/[0.12] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all font-mono shadow-inner"
                 />
               </div>
+              <p className="text-[10.5px] font-mono text-zinc-500 mt-1">
+                This will be your unique handle & profile display name.
+              </p>
             </div>
           )}
 

@@ -83,9 +83,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: error ? new Error(error.message) : null };
   };
 
-  const signUpWithEmail = async (email: string, password: string, fullName?: string) => {
+  const signUpWithEmail = async (email: string, password: string, usernameInput?: string) => {
     if (!supabase) {
       return { error: new Error("Supabase is not configured on this deployment. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables.") };
+    }
+
+    const cleanUsername = usernameInput?.trim() || "";
+
+    if (cleanUsername) {
+      // Validate username format: letters, numbers, underscores only, no spaces
+      const usernameRegex = /^[a-zA-Z0-9_]+$/;
+      if (!usernameRegex.test(cleanUsername)) {
+        return {
+          error: new Error(
+            "Username can only contain letters, numbers, and underscores (no spaces or special symbols)."
+          ),
+        };
+      }
+
+      // Check if username is already taken
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("id")
+        .ilike("username", cleanUsername)
+        .maybeSingle();
+
+      if (existing) {
+        return {
+          error: new Error(
+            `Username '@${cleanUsername}' is already taken. Please choose a different username.`
+          ),
+        };
+      }
     }
 
     const { error } = await supabase.auth.signUp({
@@ -93,8 +122,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
       options: {
         data: {
-          full_name: fullName,
-          username: fullName?.toLowerCase().replace(/\s+/g, "_"),
+          username: cleanUsername,
+          full_name: cleanUsername,
         },
       },
     });
