@@ -6,7 +6,6 @@ import { Button } from "./ui/button";
 import { StatusDot } from "./ui/status-dot";
 import { Menu, X, Command, ArrowRight } from "lucide-react";
 import { GithubIcon } from "./ui/icons";
-import { ThemeToggle } from "./ui/theme-toggle";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -92,9 +91,6 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette }: NavbarProps)
 
         {/* Right Action Items */}
         <div className="hidden sm:flex items-center gap-2.5">
-          {/* Light / Dark Mode Toggle */}
-          <ThemeToggle />
-
           {/* Command Palette Trigger */}
           <button
             onClick={onOpenCommandPalette}
@@ -140,7 +136,6 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette }: NavbarProps)
 
         {/* Mobile menu hamburger button */}
         <div className="flex sm:hidden items-center gap-2">
-          <ThemeToggle />
           <button
             onClick={onOpenCommandPalette}
             className="p-2 rounded-lg bg-zinc-900 border border-white/10 text-zinc-300"
