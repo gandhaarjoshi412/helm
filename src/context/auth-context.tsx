@@ -56,13 +56,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const signInWithEmail = async (email: string, password: string) => {
+  const signInWithEmail = async (identifier: string, password: string) => {
     if (!supabase) {
       return { error: new Error("Supabase is not configured on this deployment. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables.") };
     }
 
+    let targetEmail = identifier.trim();
+
+    // If user entered a username instead of an email (no '@' symbol)
+    if (!targetEmail.includes("@")) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email")
+        .ilike("username", targetEmail)
+        .maybeSingle();
+
+      if (profile?.email) {
+        targetEmail = profile.email;
+      }
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: targetEmail,
       password,
     });
     return { error: error ? new Error(error.message) : null };
@@ -79,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       options: {
         data: {
           full_name: fullName,
+          username: fullName?.toLowerCase().replace(/\s+/g, "_"),
         },
       },
     });

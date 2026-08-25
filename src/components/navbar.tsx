@@ -150,9 +150,9 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
                     transition={{ duration: 0.15 }}
                     className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0e1117] border border-white/15 p-2 shadow-2xl z-50 text-xs font-mono space-y-1 backdrop-blur-2xl"
                   >
-                    <div className="px-3 py-2 border-b border-white/[0.08] mb-1">
-                      <p className="text-zinc-400 text-[10px] uppercase font-bold tracking-wider">Signed in as</p>
-                      <p className="text-white font-medium truncate mt-0.5">{user.email}</p>
+                    <div className="px-3 py-2.5 border-b border-white/[0.08] mb-1">
+                      <p className="text-white font-bold text-sm truncate">{getDisplayName()}</p>
+                      <p className="text-zinc-400 text-[11px] font-mono truncate mt-0.5">{user.email}</p>
                     </div>
 
                     <div className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05] flex items-center justify-between text-[11px] text-zinc-300">
