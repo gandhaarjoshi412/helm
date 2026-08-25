@@ -22,7 +22,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const { signInWithEmail, signUpWithEmail, signInWithMagicLink, signInWithGithub, isDemoMode } = useAuth();
+  const { signInWithEmail, signUpWithEmail, signInWithMagicLink, signInWithGithub } = useAuth();
 
   if (!isOpen) return null;
 
@@ -62,11 +62,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
         if (error) {
           setErrorMsg(error.message);
         } else {
-          setSuccessMsg(
-            isDemoMode
-              ? "Account created & signed in!"
-              : "Account created! Please check your email to verify your account."
-          );
+          setSuccessMsg("Account created! Please check your email to verify your account.");
           setTimeout(() => {
             onClose();
             handleReset();
@@ -77,11 +73,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
         if (error) {
           setErrorMsg(error.message);
         } else {
-          setSuccessMsg(
-            isDemoMode
-              ? "Magic Link verified! Authenticated."
-              : "Magic link sent to your email inbox!"
-          );
+          setSuccessMsg("Magic link sent to your email inbox!");
           setTimeout(() => {
             onClose();
             handleReset();
@@ -103,11 +95,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
       if (error) {
         setErrorMsg(error.message);
       } else {
-        setSuccessMsg("GitHub Authorization Granted!");
-        setTimeout(() => {
-          onClose();
-          handleReset();
-        }, 1000);
+        setSuccessMsg("Redirecting to GitHub...");
       }
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : "GitHub OAuth failed.");
@@ -141,14 +129,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
         <div className="flex items-center gap-3 mb-5">
           <KodiumMark size={32} glow />
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-white tracking-tight text-base">Kodium Identity</span>
-              {isDemoMode && (
-                <span className="text-[9.5px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
-                  DEMO MODE
-                </span>
-              )}
-            </div>
+            <span className="font-bold text-white tracking-tight text-base block">Kodium Identity</span>
             <p className="text-xs text-zinc-400">
               Supabase Auth for AI Developer Command Center
             </p>

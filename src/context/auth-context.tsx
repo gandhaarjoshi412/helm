@@ -4,20 +4,10 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 
-export interface DemoUser {
-  id: string;
-  email: string;
-  user_metadata?: {
-    full_name?: string;
-    avatar_url?: string;
-  };
-}
-
 interface AuthContextType {
-  user: User | DemoUser | null;
+  user: User | null;
   session: Session | null;
   loading: boolean;
-  isDemoMode: boolean;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUpWithEmail: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
@@ -28,30 +18,17 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | DemoUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isDemoMode, setIsDemoMode] = useState(false);
 
   const supabase = createClient();
 
   useEffect(() => {
     if (!supabase) {
-      setIsDemoMode(true);
-      // Check if localStorage has saved demo session
-      const savedDemoUser = localStorage.getItem("kodium_demo_user");
-      if (savedDemoUser) {
-        try {
-          setUser(JSON.parse(savedDemoUser));
-        } catch {
-          // ignore parsing error
-        }
-      }
       setLoading(false);
       return;
     }
-
-    setIsDemoMode(false);
 
     // Initial session fetch
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -75,18 +52,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithEmail = async (email: string, password: string) => {
-    if (isDemoMode || !supabase) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      const demoUser: DemoUser = {
-        id: "demo-user-" + Math.random().toString(36).substring(2, 9),
-        email,
-        user_metadata: {
-          full_name: email.split("@")[0].toUpperCase() + " Dev",
-        },
-      };
-      setUser(demoUser);
-      localStorage.setItem("kodium_demo_user", JSON.stringify(demoUser));
-      return { error: null };
+    if (!supabase) {
+      return { error: new Error("Supabase is not configured on this deployment. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables.") };
     }
 
     const { error } = await supabase.auth.signInWithPassword({
@@ -97,18 +64,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUpWithEmail = async (email: string, password: string, fullName?: string) => {
-    if (isDemoMode || !supabase) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      const demoUser: DemoUser = {
-        id: "demo-user-" + Math.random().toString(36).substring(2, 9),
-        email,
-        user_metadata: {
-          full_name: fullName || email.split("@")[0],
-        },
-      };
-      setUser(demoUser);
-      localStorage.setItem("kodium_demo_user", JSON.stringify(demoUser));
-      return { error: null };
+    if (!supabase) {
+      return { error: new Error("Supabase is not configured on this deployment. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables.") };
     }
 
     const { error } = await supabase.auth.signUp({
@@ -124,18 +81,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithMagicLink = async (email: string) => {
-    if (isDemoMode || !supabase) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      const demoUser: DemoUser = {
-        id: "demo-user-" + Math.random().toString(36).substring(2, 9),
-        email,
-        user_metadata: {
-          full_name: email.split("@")[0],
-        },
-      };
-      setUser(demoUser);
-      localStorage.setItem("kodium_demo_user", JSON.stringify(demoUser));
-      return { error: null };
+    if (!supabase) {
+      return { error: new Error("Supabase is not configured on this deployment. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables.") };
     }
 
     const { error } = await supabase.auth.signInWithOtp({
@@ -148,19 +95,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGithub = async () => {
-    if (isDemoMode || !supabase) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      const demoUser: DemoUser = {
-        id: "demo-user-github",
-        email: "octocat@github.dev",
-        user_metadata: {
-          full_name: "GitHub Developer",
-          avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-        },
-      };
-      setUser(demoUser);
-      localStorage.setItem("kodium_demo_user", JSON.stringify(demoUser));
-      return { error: null };
+    if (!supabase) {
+      return { error: new Error("Supabase is not configured on this deployment. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables.") };
     }
 
     const { error } = await supabase.auth.signInWithOAuth({
@@ -173,14 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    if (isDemoMode || !supabase) {
-      setUser(null);
-      setSession(null);
-      localStorage.removeItem("kodium_demo_user");
-      return;
+    if (supabase) {
+      await supabase.auth.signOut();
     }
-
-    await supabase.auth.signOut();
     setUser(null);
     setSession(null);
   };
@@ -191,7 +122,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         session,
         loading,
-        isDemoMode,
         signInWithEmail,
         signUpWithEmail,
         signInWithMagicLink,
