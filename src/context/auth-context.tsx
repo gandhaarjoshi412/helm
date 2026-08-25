@@ -187,10 +187,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // 1. Delete user profile record from profiles table
-      await supabase.from("profiles").delete().eq("id", user.id);
+      // 1. Call Supabase RPC function to completely delete user from auth.users and profiles
+      const { error: rpcError } = await supabase.rpc("delete_user_account");
 
-      // 2. Sign out the user
+      if (rpcError) {
+        console.warn("RPC delete_user_account error, attempting direct profile delete:", rpcError);
+        // Fallback: delete profile record
+        await supabase.from("profiles").delete().eq("id", user.id);
+      }
+
+      // 2. Sign out the session and clear local auth state
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
