@@ -134,6 +134,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (msg.includes("already registered") || msg.includes("already exists") || error.status === 422) {
         return { error: new Error("An account is already registered on this email. Please sign in instead.") };
       }
+      if (msg.includes("rate limit exceeded")) {
+        return { error: new Error("Too many signup attempts in a short time. Please wait 5 minutes or sign in with GitHub.") };
+      }
       return { error: new Error(error.message) };
     }
 
