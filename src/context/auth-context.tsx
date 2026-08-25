@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -127,7 +127,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       },
     });
-    return { error: error ? new Error(error.message) : null };
+
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("already registered") || msg.includes("already exists") || error.status === 422) {
+        return { error: new Error("An account is already registered on this email. Please sign in instead.") };
+      }
+      return { error: new Error(error.message) };
+    }
+
+    // In Supabase, if email confirmation is disabled and email already exists, identities list is empty
+    if (authData?.user?.identities && authData.user.identities.length === 0) {
+      return { error: new Error("An account is already registered on this email. Please sign in instead.") };
+    }
+
+    return { error: null };
   };
 
   const signInWithMagicLink = async (email: string) => {

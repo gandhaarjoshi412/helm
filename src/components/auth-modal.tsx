@@ -206,9 +206,20 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
 
         {/* Error Alert */}
         {errorMsg && (
-          <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3 text-xs text-rose-300">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <span>{errorMsg}</span>
+          <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start justify-between gap-3 text-xs text-rose-300">
+            <div className="flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <span>{errorMsg}</span>
+            </div>
+            {errorMsg.includes("already registered") && tab === "signup" && (
+              <button
+                type="button"
+                onClick={() => handleTabChange("signin")}
+                className="shrink-0 text-[11px] font-mono font-bold text-white underline hover:text-emerald-400 cursor-pointer ml-2"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         )}
 
@@ -243,7 +254,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
                     const val = e.target.value.replace(/\s+/g, "");
                     setFullName(val);
                   }}
-                  placeholder="Prado_28"
+                  placeholder="alex_dev"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-950/90 border border-white/[0.12] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all font-mono shadow-inner"
                 />
               </div>
@@ -264,7 +275,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={tab === "signup" ? "developer@kodium.ai" : "prado or developer@kodium.ai"}
+                placeholder={tab === "signup" ? "developer@kodium.ai" : "username or developer@kodium.ai"}
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-950/90 border border-white/[0.12] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all font-mono shadow-inner"
               />
             </div>
