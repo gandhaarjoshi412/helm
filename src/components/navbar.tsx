@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { KodiumMark } from "./ui/kodium-mark";
 import { Button } from "./ui/button";
 import { StatusDot } from "./ui/status-dot";
-import { Menu, X, Command, ArrowRight, User, LogOut, Key, ChevronDown, Sparkles } from "lucide-react";
+import { Menu, X, Command, ArrowRight, User, LogOut, Key, ChevronDown, Sparkles, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { GithubIcon } from "./ui/icons";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,8 +20,10 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const { user, signOut, isDemoMode } = useAuth();
+  const { user, signOut, deleteAccount } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -179,10 +181,21 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
                         setUserMenuOpen(false);
                         await signOut();
                       }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-2 cursor-pointer border-t border-white/[0.06] mt-1 pt-2"
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors flex items-center gap-2 cursor-pointer border-t border-white/[0.06] mt-1 pt-2"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Sign Out
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        setConfirmDeleteOpen(true);
+                      }}
+                      className="w-full text-left px-3 py-1.5 rounded-lg hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-2 cursor-pointer text-[11px]"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete Account
                     </button>
                   </motion.div>
                 )}
@@ -295,6 +308,68 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
           </div>
         </div>
       )}
+
+      {/* Delete Account Confirmation Modal */}
+      <AnimatePresence>
+        {confirmDeleteOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-md rounded-2xl bg-[#0c0e13] border border-rose-500/30 p-6 shadow-2xl text-zinc-200"
+            >
+              <div className="flex items-center gap-3 mb-4 text-rose-400">
+                <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base font-sans">Delete Account?</h3>
+                  <p className="text-xs text-zinc-400 font-mono">This action is permanent and cannot be undone.</p>
+                </div>
+              </div>
+
+              <p className="text-xs text-zinc-300 mb-6 font-sans leading-relaxed">
+                Are you sure you want to delete your Kodium account? This will permanently erase your user profile and active session.
+              </p>
+
+              <div className="flex items-center justify-end gap-3 font-mono">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setConfirmDeleteOpen(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </Button>
+
+                <button
+                  onClick={async () => {
+                    setDeleting(true);
+                    await deleteAccount();
+                    setDeleting(false);
+                    setConfirmDeleteOpen(false);
+                  }}
+                  disabled={deleting}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {deleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Permanently Delete
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 }

@@ -13,6 +13,7 @@ interface AuthContextType {
   signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
   signInWithGithub: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -180,6 +181,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(null);
   };
 
+  const deleteAccount = async () => {
+    if (!supabase || !user) {
+      return { error: new Error("No active user session to delete.") };
+    }
+
+    try {
+      // 1. Delete user profile record from profiles table
+      await supabase.from("profiles").delete().eq("id", user.id);
+
+      // 2. Sign out the user
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      return { error: null };
+    } catch (err: unknown) {
+      return { error: err instanceof Error ? err : new Error("Failed to delete account.") };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -191,6 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithMagicLink,
         signInWithGithub,
         signOut,
+        deleteAccount,
       }}
     >
       {children}
