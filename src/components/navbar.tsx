@@ -4,19 +4,24 @@ import React, { useState, useEffect } from "react";
 import { KodiumMark } from "./ui/kodium-mark";
 import { Button } from "./ui/button";
 import { StatusDot } from "./ui/status-dot";
-import { Menu, X, Command, ArrowRight } from "lucide-react";
+import { Menu, X, Command, ArrowRight, User, LogOut, Key, ChevronDown, Sparkles } from "lucide-react";
 import { GithubIcon } from "./ui/icons";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/auth-context";
 
 interface NavbarProps {
   onOpenAccessModal: () => void;
   onOpenCommandPalette: () => void;
+  onOpenAuthModal: () => void;
 }
 
-export function Navbar({ onOpenAccessModal, onOpenCommandPalette }: NavbarProps) {
+export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModal }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const { user, signOut, isDemoMode } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,6 +49,19 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette }: NavbarProps)
     }
   };
 
+  const getDisplayName = () => {
+    if (!user) return "";
+    const name = user.user_metadata?.full_name;
+    if (name) return name;
+    if (user.email) return user.email.split("@")[0];
+    return "Developer";
+  };
+
+  const getInitial = () => {
+    const name = getDisplayName();
+    return name.charAt(0).toUpperCase();
+  };
+
   return (
     <motion.header
       className={cn(
@@ -54,12 +72,11 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette }: NavbarProps)
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* Brand Logo & Descriptor - Modernized Luxury Lockup */}
+        {/* Brand Logo & Descriptor */}
         <a
           href="#"
           className="flex items-center gap-3.5 group focus-visible:outline-none select-none"
         >
-          {/* Minimal Squircle Logo Shield */}
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -70,19 +87,16 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette }: NavbarProps)
 
           <div className="flex flex-col">
             <div className="flex items-center gap-2.5">
-              {/* Brand Name */}
               <span className="font-extrabold tracking-wider text-white text-lg font-sans transition-colors duration-300">
                 KODIUM
               </span>
 
-              {/* Operational Status Badge */}
               <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-mono font-bold tracking-widest bg-white/[0.04] text-zinc-300 border border-white/10 shadow-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                OPERATIONAL
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                {user ? "AUTHENTICATED" : "OPERATIONAL"}
               </span>
             </div>
 
-            {/* Subtitle tag */}
             <span className="hidden md:flex items-center gap-1.5 text-[9px] font-mono tracking-[0.16em] uppercase font-bold text-zinc-400 -mt-0.5">
               AI DEVELOPER COMMAND CENTER
             </span>
@@ -101,7 +115,7 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette }: NavbarProps)
             <span>⌘K</span>
           </button>
 
-          {/* GitHub link with Waving Octocat Animation */}
+          {/* GitHub link */}
           <a
             href="https://github.com"
             target="_blank"
@@ -112,26 +126,90 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette }: NavbarProps)
             <GithubIcon className="w-4 h-4" />
           </a>
 
-          {/* Request Access Button */}
-          <Button
-            variant="glass"
-            size="sm"
-            onClick={onOpenAccessModal}
-            className="text-xs"
-          >
-            Request Access
-          </Button>
+          {/* Auth State Button or User Profile Pill */}
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 text-xs font-mono text-white transition-all cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
+              >
+                <div className="w-6 h-6 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center justify-center font-bold text-xs">
+                  {getInitial()}
+                </div>
+                <span className="max-w-[110px] truncate font-medium">{getDisplayName()}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+              </button>
 
-          {/* Primary CTA */}
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={onOpenAccessModal}
-            className="text-xs"
-            iconRight={<ArrowRight className="w-3.5 h-3.5" />}
-          >
-            Join the Build
-          </Button>
+              {/* User Profile Dropdown Menu */}
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0e1117] border border-white/15 p-2 shadow-2xl z-50 text-xs font-mono space-y-1 backdrop-blur-2xl"
+                  >
+                    <div className="px-3 py-2 border-b border-white/[0.08] mb-1">
+                      <p className="text-zinc-400 text-[10px] uppercase font-bold tracking-wider">Signed in as</p>
+                      <p className="text-white font-medium truncate mt-0.5">{user.email}</p>
+                    </div>
+
+                    <div className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05] flex items-center justify-between text-[11px] text-zinc-300">
+                      <span className="flex items-center gap-1.5 text-zinc-400">
+                        <Key className="w-3.5 h-3.5 text-amber-400" />
+                        CLI Session
+                      </span>
+                      <span className="text-emerald-400 font-bold text-[10px]">ACTIVE</span>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        onOpenAccessModal();
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                      Command Center Access
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        setUserMenuOpen(false);
+                        await signOut();
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-2 cursor-pointer border-t border-white/[0.06] mt-1 pt-2"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <>
+              <Button
+                variant="glass"
+                size="sm"
+                onClick={onOpenAuthModal}
+                className="text-xs"
+              >
+                Sign In
+              </Button>
+
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={onOpenAccessModal}
+                className="text-xs"
+                iconRight={<ArrowRight className="w-3.5 h-3.5" />}
+              >
+                Join the Build
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile menu hamburger button */}
@@ -169,33 +247,54 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette }: NavbarProps)
             ))}
           </nav>
 
-          <div className="pt-4 border-t border-white/[0.08] flex flex-col gap-2.5">
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAccessModal();
-              }}
-              className="w-full justify-center"
-            >
-              Join the Build
-            </Button>
-            <Button
-              variant="glass"
-              size="md"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAccessModal();
-              }}
-              className="w-full justify-center"
-            >
-              Request Access
-            </Button>
+          <div className="pt-4 border-t border-white/[0.08] flex flex-col gap-2.5 font-mono text-xs">
+            {user ? (
+              <>
+                <div className="px-3 py-2 rounded-lg bg-white/[0.06] border border-white/10 text-zinc-200 flex items-center justify-between">
+                  <span>{user.email}</span>
+                  <span className="text-emerald-400 font-bold text-[10px]">CONNECTED</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={async () => {
+                    setMobileMenuOpen(false);
+                    await signOut();
+                  }}
+                  className="w-full justify-center text-rose-400"
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAuthModal();
+                  }}
+                  className="w-full justify-center"
+                >
+                  Sign In / Sign Up
+                </Button>
+                <Button
+                  variant="glass"
+                  size="md"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAccessModal();
+                  }}
+                  className="w-full justify-center"
+                >
+                  Request Access
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
     </motion.header>
   );
 }
-

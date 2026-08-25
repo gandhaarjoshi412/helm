@@ -19,6 +19,7 @@ import { UseCases } from "@/components/use-cases";
 import { FinalCta } from "@/components/final-cta";
 import { Footer } from "@/components/footer";
 import { AccessModal } from "@/components/access-modal";
+import { AuthModal } from "@/components/auth-modal";
 import { CommandPalette } from "@/components/command-palette";
 import { FadeIn } from "@/components/ui/fade-in";
 import { FloatingBottomNav } from "@/components/ui/floating-bottom-nav";
@@ -28,6 +29,7 @@ import { motion } from "framer-motion";
 
 export default function HomePage() {
   const [accessModalOpen, setAccessModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -46,86 +48,87 @@ export default function HomePage() {
         <Navbar
           onOpenAccessModal={() => setAccessModalOpen(true)}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+          onOpenAuthModal={() => setAuthModalOpen(true)}
         />
 
-      {/* Floating Glassmorphic Bottom Dock Navigation */}
-      <FloatingBottomNav />
+        {/* Floating Glassmorphic Bottom Dock Navigation */}
+        <FloatingBottomNav />
 
-      {/* Hero Section & Embedded Live Command Center Demo */}
-      <Hero onOpenAccessModal={() => setAccessModalOpen(true)} />
+        {/* Hero Section & Embedded Live Command Center Demo */}
+        <Hero onOpenAccessModal={() => setAccessModalOpen(true)} />
 
-      {/* Problem: Fragmented Development Workflow */}
-      <FadeIn direction="up" duration={0.7}>
-        <ProblemSection />
-      </FadeIn>
+        {/* Problem: Fragmented Development Workflow */}
+        <FadeIn direction="up" duration={0.7}>
+          <ProblemSection />
+        </FadeIn>
 
-      {/* The Difference: Understand, Act, Control */}
-      <FadeIn direction="up" duration={0.7}>
-        <DifferenceSection />
-      </FadeIn>
+        {/* The Difference: Understand, Act, Control */}
+        <FadeIn direction="up" duration={0.7}>
+          <DifferenceSection />
+        </FadeIn>
 
-      {/* End-to-End Interactive 12-Stage Product Walkthrough */}
-      <FadeIn direction="up" duration={0.7}>
-        <WorkflowWalkthrough />
-      </FadeIn>
+        {/* End-to-End Interactive 12-Stage Product Walkthrough */}
+        <FadeIn direction="up" duration={0.7}>
+          <WorkflowWalkthrough />
+        </FadeIn>
 
-      {/* Persistent Project Brain & Codebase Map */}
-      <FadeIn direction="up" duration={0.7}>
-        <ProjectBrain />
-      </FadeIn>
+        {/* Persistent Project Brain & Codebase Map */}
+        <FadeIn direction="up" duration={0.7}>
+          <ProjectBrain />
+        </FadeIn>
 
-      {/* Agent Execution Pipeline: Ask -> Plan -> Execute -> Verify -> Ship */}
-      <FadeIn direction="up" duration={0.7}>
-        <AgentExecution />
-      </FadeIn>
+        {/* Agent Execution Pipeline: Ask -> Plan -> Execute -> Verify -> Ship */}
+        <FadeIn direction="up" duration={0.7}>
+          <AgentExecution />
+        </FadeIn>
 
-      {/* Live Agent Terminal Stream */}
-      <FadeIn direction="up" duration={0.7}>
-        <AgentTerminal />
-      </FadeIn>
+        {/* Live Agent Terminal Stream */}
+        <FadeIn direction="up" duration={0.7}>
+          <AgentTerminal />
+        </FadeIn>
 
-      {/* Human Control & Autonomy Boundaries Matrix */}
-      <FadeIn direction="up" duration={0.7}>
-        <AutonomySection />
-      </FadeIn>
+        {/* Human Control & Autonomy Boundaries Matrix */}
+        <FadeIn direction="up" duration={0.7}>
+          <AutonomySection />
+        </FadeIn>
 
-      {/* Phone Command Center & Voice Control */}
-      <FadeIn direction="up" duration={0.7}>
-        <MobileCommandCenter />
-      </FadeIn>
+        {/* Phone Command Center & Voice Control */}
+        <FadeIn direction="up" duration={0.7}>
+          <MobileCommandCenter />
+        </FadeIn>
 
-      {/* Collaboration: Developers & Agents Shared State */}
-      <FadeIn direction="up" duration={0.7}>
-        <CollaborationSection />
-      </FadeIn>
+        {/* Collaboration: Developers & Agents Shared State */}
+        <FadeIn direction="up" duration={0.7}>
+          <CollaborationSection />
+        </FadeIn>
 
-      {/* End-to-End "Without Your Laptop" Climax Story */}
-      <FadeIn direction="up" duration={0.7}>
-        <ShipSection />
-      </FadeIn>
+        {/* End-to-End "Without Your Laptop" Climax Story */}
+        <FadeIn direction="up" duration={0.7}>
+          <ShipSection />
+        </FadeIn>
 
-      {/* Technical Architecture Blueprint */}
-      <FadeIn direction="up" duration={0.7}>
-        <ArchitectureSection />
-      </FadeIn>
+        {/* Technical Architecture Blueprint */}
+        <FadeIn direction="up" duration={0.7}>
+          <ArchitectureSection />
+        </FadeIn>
 
-      {/* Model-Agnostic Engine Layer */}
-      <FadeIn direction="up" duration={0.7}>
-        <ModelSection />
-      </FadeIn>
+        {/* Model-Agnostic Engine Layer */}
+        <FadeIn direction="up" duration={0.7}>
+          <ModelSection />
+        </FadeIn>
 
-      {/* 4 Focused Real-World Use Cases */}
-      <FadeIn direction="up" duration={0.7}>
-        <UseCases />
-      </FadeIn>
+        {/* 4 Focused Real-World Use Cases */}
+        <FadeIn direction="up" duration={0.7}>
+          <UseCases />
+        </FadeIn>
 
-      {/* Final Command Center CTA */}
-      <FadeIn direction="up" duration={0.7}>
-        <FinalCta onOpenAccessModal={() => setAccessModalOpen(true)} />
-      </FadeIn>
+        {/* Final Command Center CTA */}
+        <FadeIn direction="up" duration={0.7}>
+          <FinalCta onOpenAccessModal={() => setAccessModalOpen(true)} />
+        </FadeIn>
 
-      {/* Minimal Footer */}
-      <Footer />
+        {/* Minimal Footer */}
+        <Footer />
       </motion.div>
 
       {/* Interactive Global Modals */}
@@ -134,13 +137,17 @@ export default function HomePage() {
         onClose={() => setAccessModalOpen(false)}
       />
 
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+      />
+
       <CommandPalette
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
         onOpenAccessModal={() => setAccessModalOpen(true)}
+        onOpenAuthModal={() => setAuthModalOpen(true)}
       />
     </main>
   );
 }
-
-

@@ -1,17 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Command, ArrowRight, Shield, Cpu, Smartphone, Users, GitMerge, FileCode, Check } from "lucide-react";
+import { Search, Command, ArrowRight, Shield, Cpu, Smartphone, Users, GitMerge, FileCode, Lock, LogOut } from "lucide-react";
 import { KodiumMark } from "./ui/kodium-mark";
+import { useAuth } from "@/context/auth-context";
 
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenAccessModal: () => void;
+  onOpenAuthModal: () => void;
 }
 
-export function CommandPalette({ isOpen, onClose, onOpenAccessModal }: CommandPaletteProps) {
+export function CommandPalette({ isOpen, onClose, onOpenAccessModal, onOpenAuthModal }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -31,6 +34,20 @@ export function CommandPalette({ isOpen, onClose, onOpenAccessModal }: CommandPa
   if (!isOpen) return null;
 
   const actions = [
+    {
+      id: "auth",
+      title: user ? `Signed in as ${user.email} (Sign Out)` : "Sign In / Sign Up with Supabase Auth",
+      action: () => {
+        onClose();
+        if (user) {
+          signOut();
+        } else {
+          onOpenAuthModal();
+        }
+      },
+      icon: user ? <LogOut className="w-4 h-4 text-rose-400" /> : <Lock className="w-4 h-4 text-emerald-400" />,
+      category: "Authentication",
+    },
     {
       id: "demo",
       title: "Jump to Live Command Center Demo",
@@ -122,7 +139,7 @@ export function CommandPalette({ isOpen, onClose, onOpenAccessModal }: CommandPa
           <input
             type="text"
             autoFocus
-            placeholder="Type a command or jump to section..."
+            placeholder="Type a command, sign in, or jump to section..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-sm text-white placeholder-zinc-500 focus:outline-none font-mono"
