@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { KodiumMark } from "./ui/kodium-mark";
 import { Button } from "./ui/button";
-import { StatusDot } from "./ui/status-dot";
-import { Menu, X, Command, ArrowRight, User, LogOut, Key, ChevronDown, Sparkles, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { Menu, X, Command, ArrowRight, User, LogOut, Key, ChevronDown, Sparkles, Trash2, AlertTriangle, Loader2, Terminal } from "lucide-react";
 import { GithubIcon } from "./ui/icons";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -75,8 +75,8 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo & Descriptor */}
-        <a
-          href="#"
+        <Link
+          href="/"
           className="flex items-center gap-3.5 group focus-visible:outline-none select-none"
         >
           <motion.div
@@ -93,36 +93,61 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
                 KODIUM
               </span>
 
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-mono font-bold tracking-widest bg-white/[0.04] text-zinc-300 border border-white/10 shadow-xs">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                {user ? "AUTHENTICATED" : "OPERATIONAL"}
-              </span>
+                <span className="text-[9.5px] font-mono font-bold tracking-wider text-indigo-300">
+                  HELM AGENT
+                </span>
+              </div>
             </div>
 
             <span className="hidden md:flex items-center gap-1.5 text-[9px] font-mono tracking-[0.16em] uppercase font-bold text-zinc-400 -mt-0.5">
               AI DEVELOPER COMMAND CENTER
             </span>
           </div>
-        </a>
+        </Link>
+
+        {/* Center Nav Links */}
+        <nav className="hidden lg:flex items-center gap-6">
+          {navLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              onClick={(e) => handleNavClick(e, link.href)}
+              className="text-xs font-mono text-zinc-400 hover:text-white transition-colors"
+            >
+              {link.name}
+            </a>
+          ))}
+        </nav>
 
         {/* Right Action Items */}
         <div className="hidden sm:flex items-center gap-2.5">
+          {/* Live HELM Console Link */}
+          <Link
+            href="/workspace"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/40 text-xs font-mono font-medium shadow-[0_0_15px_rgba(99,102,241,0.35)] transition-all cursor-pointer"
+          >
+            <Terminal className="w-3.5 h-3.5" />
+            <span>Open Console</span>
+          </Link>
+
           {/* Command Palette Trigger */}
           <button
             onClick={onOpenCommandPalette}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.06] dark:bg-white/[0.06] light:bg-slate-200 hover:bg-white/[0.14] dark:hover:bg-white/[0.14] text-zinc-300 dark:text-zinc-300 light:text-slate-700 hover:text-white border border-white/20 dark:border-white/20 light:border-slate-300 text-xs font-mono transition-all backdrop-blur-md shadow-[0_4px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] text-zinc-300 hover:text-white border border-white/20 text-xs font-mono transition-all backdrop-blur-md shadow-[0_4px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] cursor-pointer"
             title="Open Command Palette"
           >
-            <Command className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-300 light:text-slate-600" />
+            <Command className="w-3.5 h-3.5 text-zinc-300" />
             <span>⌘K</span>
           </button>
 
           {/* GitHub link */}
           <a
-            href="https://github.com"
+            href="https://github.com/gandhaarjoshi412/helm"
             target="_blank"
             rel="noopener noreferrer"
-            className="relative flex items-center justify-center p-2.5 rounded-full bg-white/[0.06] dark:bg-white/[0.06] light:bg-slate-200 text-zinc-300 dark:text-zinc-300 light:text-slate-800 hover:text-white dark:hover:text-white light:hover:text-slate-950 border border-white/20 dark:border-white/20 light:border-slate-300 backdrop-blur-md shadow-[0_4px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] hover:border-white/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.25)] transition-all cursor-pointer group"
+            className="relative flex items-center justify-center p-2.5 rounded-full bg-white/[0.06] text-zinc-300 hover:text-white border border-white/20 backdrop-blur-md transition-all cursor-pointer group"
             aria-label="GitHub Repository"
           >
             <GithubIcon className="w-4 h-4" />
@@ -165,16 +190,14 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
                       <span className="text-emerald-400 font-bold text-[10px]">ACTIVE</span>
                     </div>
 
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        onOpenAccessModal();
-                      }}
+                    <Link
+                      href="/workspace"
+                      onClick={() => setUserMenuOpen(false)}
                       className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                      Command Center Access
-                    </button>
+                      <Terminal className="w-3.5 h-3.5 text-indigo-400" />
+                      HELM Console Access
+                    </Link>
 
                     <button
                       onClick={async () => {
@@ -227,6 +250,13 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
 
         {/* Mobile menu hamburger button */}
         <div className="flex sm:hidden items-center gap-2">
+          <Link
+            href="/workspace"
+            className="p-2 rounded-lg bg-indigo-600 text-white"
+            aria-label="Open Workspace"
+          >
+            <Terminal className="w-4 h-4" />
+          </Link>
           <button
             onClick={onOpenCommandPalette}
             className="p-2 rounded-lg bg-zinc-900 border border-white/10 text-zinc-300"
@@ -246,14 +276,22 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden border-b border-white/[0.1] bg-[#0c0e13]/98 dark:bg-[#0c0e13]/98 light:bg-slate-100/98 backdrop-blur-2xl px-5 py-6 space-y-4 animate-in slide-in-from-top-2 duration-200">
+        <div className="sm:hidden border-b border-white/[0.1] bg-[#0c0e13]/98 backdrop-blur-2xl px-5 py-6 space-y-4 animate-in slide-in-from-top-2 duration-200">
           <nav className="flex flex-col space-y-2">
+            <Link
+              href="/workspace"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 text-sm font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex items-center gap-2"
+            >
+              <Terminal className="w-4 h-4" />
+              <span>Launch HELM Console</span>
+            </Link>
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="px-3 py-2 text-sm font-medium text-zinc-200 dark:text-zinc-200 light:text-slate-800 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors"
+                className="px-3 py-2 text-sm font-medium text-zinc-200 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors"
               >
                 {link.name}
               </a>
