@@ -1,7 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Command, ArrowRight, Shield, Cpu, Smartphone, Users, GitMerge, FileCode, Lock, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Search,
+  Command,
+  ArrowRight,
+  Shield,
+  Cpu,
+  Smartphone,
+  Users,
+  GitMerge,
+  FileCode,
+  Terminal,
+  Lock,
+  LogOut,
+} from "lucide-react";
 import { KodiumMark } from "./ui/kodium-mark";
 import { useAuth } from "@/context/auth-context";
 
@@ -12,8 +26,14 @@ interface CommandPaletteProps {
   onOpenAuthModal: () => void;
 }
 
-export function CommandPalette({ isOpen, onClose, onOpenAccessModal, onOpenAuthModal }: CommandPaletteProps) {
+export function CommandPalette({
+  isOpen,
+  onClose,
+  onOpenAccessModal,
+  onOpenAuthModal,
+}: CommandPaletteProps) {
   const [query, setQuery] = useState("");
+  const router = useRouter();
   const { user, signOut } = useAuth();
 
   useEffect(() => {
@@ -34,6 +54,16 @@ export function CommandPalette({ isOpen, onClose, onOpenAccessModal, onOpenAuthM
   if (!isOpen) return null;
 
   const actions = [
+    {
+      id: "console",
+      title: "Launch HELM Engineering Console (/workspace)",
+      action: () => {
+        onClose();
+        router.push("/workspace");
+      },
+      icon: <Terminal className="w-4 h-4 text-indigo-400" />,
+      category: "Console",
+    },
     {
       id: "auth",
       title: user ? `Signed in as ${user.email} (Sign Out)` : "Sign In / Sign Up with Supabase Auth",
@@ -109,12 +139,13 @@ export function CommandPalette({ isOpen, onClose, onOpenAccessModal, onOpenAuthM
     },
   ];
 
-  const filtered = actions.filter((a) =>
-    a.title.toLowerCase().includes(query.toLowerCase()) ||
-    a.category.toLowerCase().includes(query.toLowerCase())
+  const filtered = actions.filter(
+    (a) =>
+      a.title.toLowerCase().includes(query.toLowerCase()) ||
+      a.category.toLowerCase().includes(query.toLowerCase())
   );
 
-  const handleSelect = (item: typeof actions[0]) => {
+  const handleSelect = (item: (typeof actions)[0]) => {
     if (item.action) {
       item.action();
     } else if (item.section) {

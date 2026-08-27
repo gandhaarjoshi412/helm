@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Cpu, Shield, Smartphone } from "lucide-react";
+import { ArrowRight, Cpu, Shield, Smartphone, Terminal } from "lucide-react";
 import { Button } from "./ui/button";
 import { HeroCommandCenter } from "./hero-command-center";
-
 import { TypewriterText } from "./ui/typewriter-effect";
 import { FloatingCodeBackground } from "./ui/floating-code-background";
 
@@ -54,9 +54,9 @@ export function Hero({ onOpenAccessModal }: HeroProps) {
           </h1>
 
           {/* Typewriter Supporting Copy */}
-          <p className="text-base sm:text-lg md:text-xl text-zinc-400 dark:text-zinc-400 light:text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed min-h-[5rem]">
+          <p className="text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto font-normal leading-relaxed min-h-[5rem]">
             <TypewriterText
-              text="Kodium gives developers a persistent command center for understanding codebases, directing autonomous agents, reviewing changes, and shipping software — from desktop or phone."
+              text="Kodium gives developers a persistent command center for understanding codebases, directing the HELM autonomous agent, reviewing diffs, and shipping software — from desktop or phone."
               speed={15}
               delay={2100}
             />
@@ -64,15 +64,16 @@ export function Hero({ onOpenAccessModal }: HeroProps) {
 
           {/* CTAs and quick key hint */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={onOpenAccessModal}
-              iconRight={<ArrowRight className="w-4 h-4" />}
-              className="w-full sm:w-auto text-sm px-6 shadow-white/10 shadow-lg"
-            >
-              Explore Kodium
-            </Button>
+            <Link href="/workspace" className="w-full sm:w-auto">
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full sm:w-auto text-sm px-6 shadow-indigo-500/25 shadow-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium"
+              >
+                <Terminal className="w-4 h-4 mr-2" />
+                Launch HELM Console
+              </Button>
+            </Link>
 
             <Button
               variant="glass"
@@ -88,15 +89,15 @@ export function Hero({ onOpenAccessModal }: HeroProps) {
           <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-zinc-400">
             <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-2 cursor-default">
               <Cpu className="w-3.5 h-3.5 text-zinc-200" />
-              <span>Full Codebase Brain</span>
+              <span>AST Codebase Brain</span>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-2 cursor-default">
               <Shield className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Hardened Permission Boundaries</span>
+              <span>Gated Permission Gates</span>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-2 cursor-default">
               <Smartphone className="w-3.5 h-3.5 text-amber-400" />
-              <span>Mobile Command & Control</span>
+              <span>Mobile Command Center</span>
             </motion.div>
           </div>
         </motion.div>
@@ -115,4 +116,3 @@ export function Hero({ onOpenAccessModal }: HeroProps) {
     </section>
   );
 }
-
