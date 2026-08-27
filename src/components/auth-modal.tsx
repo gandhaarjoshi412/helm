@@ -181,29 +181,25 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
             {/* Step 1 */}
             <motion.div
               whileHover={{ x: 3 }}
-              className={`flex items-center gap-3.5 p-3.5 rounded-2xl border transition-all ${
-                tab === "signup"
-                  ? "bg-white text-zinc-950 border-white shadow-[0_10px_30px_rgba(255,255,255,0.25)]"
-                  : "bg-white/[0.05] text-zinc-200 border-white/10 hover:bg-white/[0.08]"
-              }`}
+              className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white text-zinc-950 border border-white shadow-[0_10px_30px_rgba(255,255,255,0.25)] transition-all"
             >
-              <div
-                className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs ${
-                  tab === "signup"
-                    ? "bg-zinc-950 text-white"
-                    : "bg-white/10 text-zinc-300"
-                }`}
-              >
+              <div className="w-7 h-7 rounded-xl bg-zinc-950 text-white flex items-center justify-center font-bold text-xs">
                 1
               </div>
               <div className="flex flex-col text-xs">
-                <span className="font-bold tracking-wide">Sign up your account</span>
-                <span
-                  className={`text-[10.5px] ${
-                    tab === "signup" ? "text-zinc-700 font-medium" : "text-zinc-400"
-                  }`}
-                >
-                  Create developer credentials
+                <span className="font-bold tracking-wide">
+                  {tab === "signup"
+                    ? "Sign up your account"
+                    : tab === "signin"
+                    ? "Sign in to account"
+                    : "Magic Link access"}
+                </span>
+                <span className="text-[10.5px] text-zinc-700 font-medium">
+                  {tab === "signup"
+                    ? "Create developer credentials"
+                    : tab === "signin"
+                    ? "Authenticate developer credentials"
+                    : "Passwordless email sign-in"}
                 </span>
               </div>
             </motion.div>
@@ -211,28 +207,14 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
             {/* Step 2 */}
             <motion.div
               whileHover={{ x: 3 }}
-              className={`flex items-center gap-3.5 p-3.5 rounded-2xl border transition-all ${
-                tab === "signin"
-                  ? "bg-white text-zinc-950 border-white shadow-[0_10px_30px_rgba(255,255,255,0.25)]"
-                  : "bg-white/[0.05] text-zinc-200 border-white/10 hover:bg-white/[0.08]"
-              }`}
+              className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.05] text-zinc-200 border border-white/10 hover:bg-white/[0.08] transition-all"
             >
-              <div
-                className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs ${
-                  tab === "signin"
-                    ? "bg-zinc-950 text-white"
-                    : "bg-white/10 text-zinc-300"
-                }`}
-              >
+              <div className="w-7 h-7 rounded-xl bg-white/10 text-zinc-300 flex items-center justify-center font-bold text-xs">
                 2
               </div>
               <div className="flex flex-col text-xs">
                 <span className="font-bold tracking-wide">Connect CLI & Workspace</span>
-                <span
-                  className={`text-[10.5px] ${
-                    tab === "signin" ? "text-zinc-700 font-medium" : "text-zinc-400"
-                  }`}
-                >
+                <span className="text-[10.5px] text-zinc-400">
                   Sync code repository & agents
                 </span>
               </div>

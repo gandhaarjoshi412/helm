@@ -11,6 +11,8 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUpWithEmail: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
+  signInWithPhone: (phone: string) => Promise<{ error: Error | null }>;
+  verifyPhoneOtp: (phone: string, token: string) => Promise<{ error: Error | null }>;
   signInWithGithub: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<{ error: Error | null }>;
@@ -159,6 +161,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
+    return { error: error ? new Error(error.message) : null };
+  };
+
+  const signInWithPhone = async (phone: string) => {
+    if (!supabase) {
+      return { error: new Error("Supabase is not configured on this deployment. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables.") };
+    }
+
+    let formattedPhone = phone.trim();
+    if (!formattedPhone.startsWith("+")) {
+      formattedPhone = `+${formattedPhone}`;
+    }
+
+    const digitsOnly = formattedPhone.replace(/\D/g, "");
+    if (digitsOnly.length < 8 || digitsOnly.length > 15) {
+      return { error: new Error("Please enter a valid phone number with country code (e.g. +1234567890 or +919876543210).") };
+    }
+
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: formattedPhone,
+    });
+
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("unsupported phone provider") || msg.includes("sms provider") || msg.includes("provider is not enabled")) {
+        return { error: new Error("SMS authentication provider is not configured in Supabase dashboard. Please configure Twilio/SMS or use Email / GitHub Sign In.") };
+      }
+      return { error: new Error(error.message) };
+    }
+
+    return { error: null };
+  };
+
+  const verifyPhoneOtp = async (phone: string, token: string) => {
+    if (!supabase) {
+      return { error: new Error("Supabase is not configured on this deployment.") };
+    }
+
+    let formattedPhone = phone.trim();
+    if (!formattedPhone.startsWith("+")) {
+      formattedPhone = `+${formattedPhone}`;
+    }
+
+    const { error } = await supabase.auth.verifyOtp({
+      phone: formattedPhone,
+      token: token.trim(),
+      type: "sms",
+    });
+
     return { error: error ? new Error(error.message) : null };
   };
 
