@@ -56,6 +56,12 @@ export function WorkspaceView() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
   const [copiedAnswer, setCopiedAnswer] = useState<boolean>(false);
 
+  React.useEffect(() => {
+    if (!authLoading && !user) {
+      queueMicrotask(() => setIsAuthModalOpen(true));
+    }
+  }, [authLoading, user]);
+
   const streamState = useTaskStream(activeTaskId);
   const { handleApprove, handleReject } = useApprovals();
 
