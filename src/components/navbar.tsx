@@ -16,6 +16,15 @@ interface NavbarProps {
   onOpenAuthModal: () => void;
 }
 
+const NAV_LINKS = [
+  { name: "Product", href: "#demo" },
+  { name: "How it works", href: "#how-it-works" },
+  { name: "Brain", href: "#brain" },
+  { name: "Agent", href: "#agent" },
+  { name: "Mobile", href: "#mobile" },
+  { name: "Technology", href: "#architecture" },
+];
+
 export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModal }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,21 +36,12 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
 
   const { user, signOut, deleteAccount } = useAuth();
 
-  const navLinks = [
-    { name: "Product", href: "#demo" },
-    { name: "How it works", href: "#how-it-works" },
-    { name: "Brain", href: "#brain" },
-    { name: "Agent", href: "#agent" },
-    { name: "Mobile", href: "#mobile" },
-    { name: "Technology", href: "#architecture" },
-  ];
-
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
 
       const scrollPosition = window.scrollY + 200;
-      navLinks.forEach((link) => {
+      NAV_LINKS.forEach((link) => {
         const target = document.querySelector(link.href);
         if (target) {
           const top = (target as HTMLElement).offsetTop;
@@ -291,7 +291,7 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
               <span>Launch HELM Console</span>
             </Link>
 
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
