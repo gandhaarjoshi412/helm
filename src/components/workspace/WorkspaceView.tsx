@@ -373,6 +373,8 @@ export function WorkspaceView() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+        isProtected={!user}
+        reason={!user ? "Please login first to use the command center" : undefined}
       />
     </div>
   );

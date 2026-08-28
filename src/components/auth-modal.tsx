@@ -28,9 +28,17 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialTab?: "signin" | "signup" | "magiclink";
+  isProtected?: boolean;
+  reason?: string;
 }
 
-export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalProps) {
+export function AuthModal({
+  isOpen,
+  onClose,
+  initialTab = "signin",
+  isProtected = false,
+  reason,
+}: AuthModalProps) {
   const [tab, setTab] = useState<"signin" | "signup" | "magiclink">(initialTab);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,6 +51,17 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
   const { signInWithEmail, signUpWithEmail, signInWithMagicLink, signInWithGithub } = useAuth();
 
   if (!isOpen) return null;
+
+  const handleCloseModal = () => {
+    handleReset();
+    if (isProtected) {
+      if (typeof window !== "undefined") {
+        window.location.assign("/");
+      }
+    } else {
+      onClose();
+    }
+  };
 
   const handleReset = () => {
     setErrorMsg(null);
@@ -135,10 +154,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
       >
         {/* Close Button */}
         <button
-          onClick={() => {
-            handleReset();
-            onClose();
-          }}
+          onClick={handleCloseModal}
           className="absolute top-4 right-4 z-20 p-2 rounded-2xl bg-white/[0.06] hover:bg-white/[0.15] text-zinc-400 hover:text-white border border-white/10 transition-all cursor-pointer backdrop-blur-md"
           aria-label="Close authentication modal"
         >
@@ -248,6 +264,14 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
 
         {/* RIGHT PANEL - Clean Form Section */}
         <div className="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-center bg-[#08090d]">
+          {/* Reason Popup Notice */}
+          {reason && (
+            <div className="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2.5 text-xs text-amber-300 font-mono font-bold animate-pulse">
+              <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>{reason}</span>
+            </div>
+          )}
+
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between">
