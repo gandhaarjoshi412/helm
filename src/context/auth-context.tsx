@@ -59,29 +59,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithEmail = async (identifier: string, password: string) => {
     if (!supabase) {
-      return { error: new Error("Supabase is not configured on this deployment. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables.") };
+      return {
+        error: new Error(
+          "Supabase is not configured on this deployment. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables."
+        ),
+      };
     }
 
     let targetEmail = identifier.trim();
 
     // If user entered a username instead of an email (no '@' symbol)
     if (!targetEmail.includes("@")) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("email")
-        .ilike("username", targetEmail)
-        .maybeSingle();
+      try {
+        const profileQuery = supabase
+          .from("profiles")
+          .select("email")
+          .ilike("username", targetEmail)
+          .maybeSingle();
 
-      if (profile?.email) {
-        targetEmail = profile.email;
+        const timeoutPromise = new Promise<{ data: { email: string } | null }>((resolve) =>
+          setTimeout(() => resolve({ data: null }), 2500)
+        );
+
+        const result = await Promise.race([profileQuery, timeoutPromise]);
+        if (result && "data" in result && result.data?.email) {
+          targetEmail = result.data.email;
+        }
+      } catch (_e) {
+        // Fallback gracefully if profile lookup fails
       }
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: targetEmail,
-      password,
-    });
-    return { error: error ? new Error(error.message) : null };
+    if (!targetEmail.includes("@")) {
+      return {
+        error: new Error(
+          `Could not find an email associated with username '${identifier}'. Please enter your registered email address.`
+        ),
+      };
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: targetEmail,
+        password,
+      });
+      return { error: error ? new Error(error.message) : null };
+    } catch (err: unknown) {
+      return {
+        error: new Error(
+          err instanceof Error ? err.message : "Failed to sign in. Please check your network connection."
+        ),
+      };
+    }
   };
 
   const signUpWithEmail = async (email: string, password: string, usernameInput?: string) => {
