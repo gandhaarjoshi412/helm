@@ -28,32 +28,39 @@ interface LogEntry {
   highlight?: boolean;
 }
 
-const fullLogs: LogEntry[] = [
-  { time: "10:42:13", category: "CORE", message: "Agent session initialized in ephemeral sandbox (ID: sbx_9942a)", status: "success" },
-  { time: "10:42:14", category: "BRAIN", message: "Indexing repository AST & topology (342 source files loaded in memory)", status: "success" },
-  { time: "10:42:17", category: "AST", message: "Inspecting src/services/payment.ts & call graph references", status: "success" },
-  { time: "10:42:21", category: "GIT", message: "Reading recent commit history [commit #a84f2e1: 'refactor: checkout latency tuning']", status: "success" },
-  { time: "10:42:28", category: "DOCS", message: "Autonomous search: Stripe API documentation v14 [HTTP 408 & Idempotency Keys]", status: "success" },
-  { time: "10:42:34", category: "CORE", message: "Root cause identified: unhandled timeout in charges.create without backoff", highlight: true, status: "success" },
-  { time: "10:42:38", category: "PATCH", message: "Preparing AST patch across 3 files + generating unit tests in tests/payment.test.ts", status: "success" },
-  { time: "10:42:44", category: "TEST", message: "Executing sandbox test runner: npm test -- --coverage", status: "active" },
-  { time: "10:42:49", category: "TEST", message: "✓ 47 unit & integration tests passed in 312ms (0 failures, 100% coverage)", status: "success", highlight: true },
-  { time: "10:42:52", category: "GATE", message: "Action requires developer approval [Deploy boundary level: GUIDED]", status: "pending", highlight: true },
+const rawLogs: Omit<LogEntry, "time">[] = [
+  { category: "CORE", message: "Agent session initialized in ephemeral sandbox (ID: sbx_9942a)", status: "success" },
+  { category: "BRAIN", message: "Indexing repository AST & topology (342 source files loaded in memory)", status: "success" },
+  { category: "AST", message: "Inspecting src/services/payment.ts & call graph references", status: "success" },
+  { category: "GIT", message: "Reading recent commit history [commit #a84f2e1: 'refactor: checkout latency tuning']", status: "success" },
+  { category: "DOCS", message: "Autonomous search: Stripe API documentation v14 [HTTP 408 & Idempotency Keys]", status: "success" },
+  { category: "CORE", message: "Root cause identified: unhandled timeout in charges.create without backoff", highlight: true, status: "success" },
+  { category: "PATCH", message: "Preparing AST patch across 3 files + generating unit tests in tests/payment.test.ts", status: "success" },
+  { category: "TEST", message: "Executing sandbox test runner: npm test -- --coverage", status: "active" },
+  { category: "TEST", message: "✓ 47 unit & integration tests passed in 312ms (0 failures, 100% coverage)", status: "success", highlight: true },
+  { category: "GATE", message: "Action requires developer approval [Deploy boundary level: GUIDED]", status: "pending", highlight: true },
 ];
 
 export function AgentTerminal() {
-  const [visibleCount, setVisibleCount] = useState<number>(fullLogs.length);
+  const [logs] = useState<LogEntry[]>(() => {
+    const baseTime = Date.now() - 40000;
+    const offsets = [0, 1, 4, 8, 15, 21, 25, 31, 36, 39];
+    return rawLogs.map((item, idx) => ({
+      ...item,
+      time: new Date(baseTime + offsets[idx] * 1000).toTimeString().split(" ")[0],
+    }));
+  });
+  const [visibleCount, setVisibleCount] = useState<number>(rawLogs.length);
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [speed, setSpeed] = useState<number>(1000);
   const [filter, setFilter] = useState<string>("ALL");
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || logs.length === 0) return;
 
     const interval = setInterval(() => {
       setVisibleCount((prev) => {
-        if (prev >= fullLogs.length) {
-          // Restart loop after small pause
+        if (prev >= logs.length) {
           return 1;
         }
         return prev + 1;
@@ -61,9 +68,9 @@ export function AgentTerminal() {
     }, speed);
 
     return () => clearInterval(interval);
-  }, [isPlaying, speed]);
+  }, [isPlaying, speed, logs.length]);
 
-  const filteredLogs = fullLogs.slice(0, visibleCount).filter((item) => {
+  const filteredLogs = logs.slice(0, visibleCount).filter((item) => {
     if (filter === "ALL") return true;
     if (filter === "TEST") return item.category === "TEST";
     if (filter === "GIT") return item.category === "GIT";
@@ -72,7 +79,7 @@ export function AgentTerminal() {
   });
 
   return (
-    <section id="agent" className="relative py-28 bg-black dark:bg-black light:bg-slate-50 border-t border-white/[0.06] dark:border-white/[0.06] light:border-slate-200 overflow-hidden">
+    <section id="terminal" className="relative py-28 bg-black dark:bg-black light:bg-slate-50 border-t border-white/[0.06] dark:border-white/[0.06] light:border-slate-200 overflow-hidden">
       {/* Background Aurora Glow */}
       <div className="absolute top-0 left-1/3 w-[750px] h-[350px] bg-gradient-to-b from-white/[0.04] via-zinc-400/[0.02] to-transparent rounded-full blur-[140px] pointer-events-none -z-10" />
 
@@ -238,7 +245,7 @@ export function AgentTerminal() {
           <div className="px-4 py-2.5 border-t border-white/[0.06] bg-[#07080c] flex flex-wrap items-center justify-between text-[11px] text-zinc-400">
             <div className="flex items-center gap-4">
               <span>Sandbox Status: <strong className="text-emerald-400">ISOLATED</strong></span>
-              <span>Events: <strong className="text-zinc-300">{visibleCount}/{fullLogs.length}</strong></span>
+              <span>Events: <strong className="text-zinc-300">{visibleCount}/{logs.length}</strong></span>
             </div>
             <div className="flex items-center gap-2">
               <Shield className="w-3.5 h-3.5 text-zinc-200" />

@@ -23,15 +23,9 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const { user, signOut, deleteAccount } = useAuth();
+  const [activeNav, setActiveNav] = useState<string>("#demo");
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const { user, signOut, deleteAccount } = useAuth();
 
   const navLinks = [
     { name: "Product", href: "#demo" },
@@ -42,8 +36,29 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
     { name: "Technology", href: "#architecture" },
   ];
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+
+      const scrollPosition = window.scrollY + 200;
+      navLinks.forEach((link) => {
+        const target = document.querySelector(link.href);
+        if (target) {
+          const top = (target as HTMLElement).offsetTop;
+          const height = (target as HTMLElement).offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            setActiveNav(link.href);
+          }
+        }
+      });
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    setActiveNav(href);
     setMobileMenuOpen(false);
     const target = document.querySelector(href);
     if (target) {
@@ -87,48 +102,25 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
             <KodiumMark size={24} glow />
           </motion.div>
 
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2.5">
-              <span className="font-extrabold tracking-wider text-white text-lg font-sans transition-colors duration-300">
-                KODIUM
-              </span>
-
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[9.5px] font-mono font-bold tracking-wider text-indigo-300">
-                  HELM AGENT
-                </span>
-              </div>
-            </div>
-
-            <span className="hidden md:flex items-center gap-1.5 text-[9px] font-mono tracking-[0.16em] uppercase font-bold text-zinc-400 -mt-0.5">
-              AI DEVELOPER COMMAND CENTER
+          <div className="flex items-center">
+            <span className="font-extrabold tracking-wider text-white text-lg font-sans transition-colors duration-300">
+              KODIUM
             </span>
           </div>
         </Link>
 
-        {/* Center Nav Links */}
-        <nav className="hidden lg:flex items-center gap-6">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              onClick={(e) => handleNavClick(e, link.href)}
-              className="text-xs font-mono text-zinc-400 hover:text-white transition-colors"
-            >
-              {link.name}
-            </a>
-          ))}
-        </nav>
+
+
+
 
         {/* Right Action Items */}
         <div className="hidden sm:flex items-center gap-2.5">
           {/* Live HELM Console Link */}
           <Link
             href="/workspace"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/40 text-xs font-mono font-medium shadow-[0_0_15px_rgba(99,102,241,0.35)] transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-zinc-950 font-extrabold hover:bg-zinc-100 border border-white/80 text-xs font-mono shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all cursor-pointer"
           >
-            <Terminal className="w-3.5 h-3.5" />
+            <Terminal className="w-3.5 h-3.5 text-zinc-950" />
             <span>Open Console</span>
           </Link>
 
@@ -248,18 +240,30 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
           )}
         </div>
 
-        {/* Mobile menu hamburger button */}
-        <div className="flex sm:hidden items-center gap-2">
-          <Link
-            href="/workspace"
-            className="p-2 rounded-lg bg-indigo-600 text-white"
-            aria-label="Open Workspace"
-          >
-            <Terminal className="w-4 h-4" />
-          </Link>
+        {/* Mobile controls & Sign In button */}
+        <div className="flex sm:hidden items-center gap-1.5">
+          {!user ? (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onOpenAuthModal}
+              className="text-xs px-3 py-1 h-8 font-bold bg-white text-black rounded-lg shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+            >
+              Sign In
+            </Button>
+          ) : (
+            <Link
+              href="/workspace"
+              className="p-1.5 rounded-lg bg-white/10 text-white border border-white/20"
+              aria-label="Open Workspace"
+            >
+              <Terminal className="w-4 h-4" />
+            </Link>
+          )}
+
           <button
             onClick={onOpenCommandPalette}
-            className="p-2 rounded-lg bg-zinc-900 border border-white/10 text-zinc-300"
+            className="p-2 rounded-lg bg-white/5 border border-white/10 text-zinc-300"
             aria-label="Open command palette"
           >
             <Command className="w-4 h-4" />
@@ -286,12 +290,18 @@ export function Navbar({ onOpenAccessModal, onOpenCommandPalette, onOpenAuthModa
               <Terminal className="w-4 h-4" />
               <span>Launch HELM Console</span>
             </Link>
+
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="px-3 py-2 text-sm font-medium text-zinc-200 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors"
+                className={cn(
+                  "px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer",
+                  activeNav === link.href
+                    ? "text-white bg-white/10 font-bold"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                )}
               >
                 {link.name}
               </a>

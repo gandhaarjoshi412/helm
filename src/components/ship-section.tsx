@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Bell,
   Smartphone,
@@ -22,11 +22,19 @@ import { cn } from "@/lib/utils";
 
 export function ShipSection() {
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [times] = useState<string[]>(() => {
+    const now = new Date();
+    const minuteOffsets = [0, 1, 1, 2, 3, 4];
+    return minuteOffsets.map((offset) => {
+      const d = new Date(now.getTime() - (4 - offset) * 60000);
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+    });
+  });
 
   const storySteps = [
     {
       id: 0,
-      time: "10:42 PM",
+      time: times[0] || "T+0m",
       actor: "Pager Alert",
       headline: "Production Alert Triggered",
       desc: "Developer is away at dinner. An automated PagerDuty/Sentry alert fires: 18% latency spike on checkout API.",
@@ -35,7 +43,7 @@ export function ShipSection() {
     },
     {
       id: 1,
-      time: "10:43 PM",
+      time: times[1] || "T+1m",
       actor: "Developer Query",
       headline: "Developer Opens Kodium Mobile",
       desc: "From their phone, the developer asks Kodium what changed in natural language.",
@@ -47,7 +55,7 @@ export function ShipSection() {
     },
     {
       id: 2,
-      time: "10:43 PM",
+      time: times[2] || "T+1m",
       actor: "Kodium Intelligence",
       headline: "Autonomous Diagnosis in 8 Seconds",
       desc: "Kodium pinpoints the exact regression in the payment client.",
@@ -59,7 +67,7 @@ export function ShipSection() {
     },
     {
       id: 3,
-      time: "10:44 PM",
+      time: times[3] || "T+2m",
       actor: "Developer Command",
       headline: "Delegation with Clear Boundary",
       desc: "The developer issues the order with explicit permission boundaries.",
@@ -71,7 +79,7 @@ export function ShipSection() {
     },
     {
       id: 4,
-      time: "10:45 PM",
+      time: times[4] || "T+3m",
       actor: "Agent Sandbox",
       headline: "Patch Prepared & 47 Tests Verified",
       desc: "Agent writes exponential retry logic and verifies 47/47 tests in an isolated sandbox.",
@@ -83,7 +91,7 @@ export function ShipSection() {
     },
     {
       id: 5,
-      time: "10:46 PM",
+      time: times[5] || "T+4m",
       actor: "One-Tap Approve",
       headline: "One-Tap Production Approval",
       desc: "The developer taps Approve. Kodium commits, pushes branch, executes CI pipeline, and monitors canary health.",
@@ -144,7 +152,7 @@ export function ShipSection() {
             {/* Left: Narrative Context (7 cols) */}
             <div className="lg:col-span-7 space-y-6">
               <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono font-semibold flex items-center gap-1.5">
+                <span suppressHydrationWarning className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono font-semibold flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5" />
                   {storySteps[currentStep].time}
                 </span>

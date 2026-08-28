@@ -24,10 +24,9 @@ export function TypewriterText({
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
     let intervalId: NodeJS.Timeout;
 
-    timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setIsTyping(true);
       let currentIndex = 0;
 

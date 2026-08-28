@@ -41,7 +41,7 @@ async function request<T>(
       throw new Error(errorMessage);
     }
     return (await res.json()) as T;
-  } catch (err: any) {
+  } catch (err) {
     console.error(`[API Error] ${endpoint}:`, err);
     throw err;
   }

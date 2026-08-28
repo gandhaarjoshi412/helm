@@ -476,7 +476,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "signin" }: AuthModalP
               </p>
             ) : (
               <p>
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <button
                   type="button"
                   onClick={() => handleTabChange("signup")}

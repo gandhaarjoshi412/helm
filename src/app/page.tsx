@@ -18,11 +18,12 @@ import { ModelSection } from "@/components/model-section";
 import { UseCases } from "@/components/use-cases";
 import { FinalCta } from "@/components/final-cta";
 import { Footer } from "@/components/footer";
+import { FloatingBottomNav } from "@/components/floating-bottom-nav";
 import { AccessModal } from "@/components/access-modal";
 import { AuthModal } from "@/components/auth-modal";
 import { CommandPalette } from "@/components/command-palette";
 import { FadeIn } from "@/components/ui/fade-in";
-import { FloatingBottomNav } from "@/components/ui/floating-bottom-nav";
+
 import { Preloader } from "@/components/ui/preloader";
 
 import { motion } from "framer-motion";
@@ -38,6 +39,9 @@ export default function HomePage() {
       {/* High-Tech Preloader Screen */}
       <Preloader onComplete={() => setIsLoaded(true)} />
 
+      {/* Persistent Floating Bottom Dock Navigation Pill */}
+      <FloatingBottomNav />
+
       {/* Website Revealed After 100% Loading */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -51,11 +55,13 @@ export default function HomePage() {
           onOpenAuthModal={() => setAuthModalOpen(true)}
         />
 
-        {/* Floating Glassmorphic Bottom Dock Navigation */}
-        <FloatingBottomNav />
+
 
         {/* Hero Section & Embedded Live Command Center Demo */}
-        <Hero onOpenAccessModal={() => setAccessModalOpen(true)} />
+        <Hero
+          onOpenAccessModal={() => setAccessModalOpen(true)}
+          onOpenAuthModal={() => setAuthModalOpen(true)}
+        />
 
         {/* Problem: Fragmented Development Workflow */}
         <FadeIn direction="up" duration={0.7}>

@@ -866,7 +866,7 @@ export function WorkflowWalkthrough() {
 
                           {/* Android Status Bar */}
                           <div className="flex items-center justify-between text-[10px] text-zinc-400 pb-2 border-b border-white/10 pt-1">
-                            <span className="font-bold text-white">10:42 PM</span>
+                            <span className="font-bold text-emerald-400">LIVE</span>
                             <div className="flex items-center gap-1.5">
                               <span className="text-[9px] font-bold text-zinc-300">5G</span>
                               <span className="text-emerald-400 font-bold">Android Kodium</span>

@@ -49,12 +49,39 @@ export function useTaskStream(taskId: string | null | undefined) {
 
   useEffect(() => {
     if (!taskId) {
-      resetState();
+      queueMicrotask(() => {
+        setState((prev) =>
+          prev.status === "idle"
+            ? prev
+            : {
+                events: [],
+                currentPhase: "idle",
+                status: "idle",
+                pendingApproval: null,
+                selfCorrectionCount: 0,
+                testsCount: { passed: 0, failed: 0, total: 0 },
+                modifiedFiles: [],
+                lastError: null,
+                isConnected: false,
+              }
+        );
+      });
       return;
     }
 
-    resetState();
-    setState((prev) => ({ ...prev, status: "connecting" }));
+    queueMicrotask(() => {
+      setState({
+        events: [],
+        currentPhase: "recon",
+        status: "connecting",
+        pendingApproval: null,
+        selfCorrectionCount: 0,
+        testsCount: { passed: 0, failed: 0, total: 0 },
+        modifiedFiles: [],
+        lastError: null,
+        isConnected: false,
+      });
+    });
 
     const tokenQuery = API_KEY ? `?token=${encodeURIComponent(API_KEY)}` : "";
     const url = `${API_BASE_URL}/api/tasks/${taskId}/events${tokenQuery}`;
@@ -84,8 +111,8 @@ export function useTaskStream(taskId: string | null | undefined) {
           let nextStatus = prev.status;
           let nextApproval = prev.pendingApproval;
           let nextSelfCorrectionCount = prev.selfCorrectionCount;
-          let nextTests = { ...prev.testsCount };
-          let nextFiles = [...prev.modifiedFiles];
+          const nextTests = { ...prev.testsCount };
+          const nextFiles = [...prev.modifiedFiles];
 
           if (parsed.phase) {
             nextPhase = parsed.phase;
@@ -141,7 +168,7 @@ export function useTaskStream(taskId: string | null | undefined) {
             modifiedFiles: nextFiles,
           };
         });
-      } catch (err: any) {
+      } catch (err) {
         console.error("[SSE Parse Error]", err, eventData);
       }
     };
@@ -183,7 +210,7 @@ export function useTaskStream(taskId: string | null | undefined) {
       });
     });
 
-    es.onerror = (err) => {
+    es.onerror = (_err) => {
       setState((prev) => ({
         ...prev,
         isConnected: false,

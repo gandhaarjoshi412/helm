@@ -3,24 +3,28 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Cpu, Shield, Smartphone, Terminal } from "lucide-react";
+import { ArrowRight, Cpu, Shield, Smartphone, Terminal, LogIn } from "lucide-react";
 import { Button } from "./ui/button";
 import { HeroCommandCenter } from "./hero-command-center";
 import { TypewriterText } from "./ui/typewriter-effect";
 import { FloatingCodeBackground } from "./ui/floating-code-background";
+import { useAuth } from "@/context/auth-context";
 
 interface HeroProps {
   onOpenAccessModal: () => void;
+  onOpenAuthModal?: () => void;
 }
 
-export function Hero({ onOpenAccessModal }: HeroProps) {
+export function Hero({ onOpenAccessModal, onOpenAuthModal }: HeroProps) {
+  const { user } = useAuth();
+
   const handleScrollToSection = (id: string) => {
     const el = document.querySelector(id);
     el?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <section className="hero-section relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden tech-grid bg-black text-white">
+    <section id="demo" className="hero-section relative pt-24 pb-14 md:pt-36 md:pb-24 overflow-hidden tech-grid bg-black text-white">
       {/* Floating Background Code Widgets Design */}
       <FloatingCodeBackground />
 
@@ -38,10 +42,10 @@ export function Hero({ onOpenAccessModal }: HeroProps) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="max-w-4xl mx-auto text-center space-y-6 mb-12"
+          className="max-w-4xl mx-auto text-center space-y-5 sm:space-y-6 mb-10 md:mb-12"
         >
           {/* Typewriter Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.08] select-none">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.1] select-none">
             <TypewriterText text="Your development environment." speed={35} delay={200} /> <br />
             <span className="inline-block mt-1">
               <TypewriterText
@@ -54,7 +58,7 @@ export function Hero({ onOpenAccessModal }: HeroProps) {
           </h1>
 
           {/* Typewriter Supporting Copy */}
-          <p className="text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto font-normal leading-relaxed min-h-[5rem]">
+          <p className="text-sm sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto font-normal leading-relaxed min-h-[4.5rem]">
             <TypewriterText
               text="Kodium gives developers a persistent command center for understanding codebases, directing the HELM autonomous agent, reviewing diffs, and shipping software — from desktop or phone."
               speed={15}
@@ -68,12 +72,24 @@ export function Hero({ onOpenAccessModal }: HeroProps) {
               <Button
                 variant="primary"
                 size="lg"
-                className="w-full sm:w-auto text-sm px-6 shadow-indigo-500/25 shadow-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium"
+                className="w-full sm:w-auto text-sm px-6 bg-white text-zinc-950 font-extrabold hover:bg-zinc-100 border border-white/80 shadow-[0_0_25px_rgba(255,255,255,0.35)] rounded-xl"
               >
-                <Terminal className="w-4 h-4 mr-2" />
+                <Terminal className="w-4 h-4 mr-2 text-zinc-950" />
                 Launch HELM Console
               </Button>
             </Link>
+
+            {!user && onOpenAuthModal && (
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={onOpenAuthModal}
+                className="w-full sm:w-auto text-sm px-6"
+                icon={<LogIn className="w-4 h-4" />}
+              >
+                Sign In / Connect
+              </Button>
+            )}
 
             <Button
               variant="glass"
@@ -84,22 +100,6 @@ export function Hero({ onOpenAccessModal }: HeroProps) {
               See how it works
             </Button>
           </div>
-
-          {/* Micro telemetry highlights */}
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-zinc-400">
-            <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-2 cursor-default">
-              <Cpu className="w-3.5 h-3.5 text-zinc-200" />
-              <span>AST Codebase Brain</span>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-2 cursor-default">
-              <Shield className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Gated Permission Gates</span>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-2 cursor-default">
-              <Smartphone className="w-3.5 h-3.5 text-amber-400" />
-              <span>Mobile Command Center</span>
-            </motion.div>
-          </div>
         </motion.div>
 
         {/* Hero Interactive Command Center */}
@@ -108,7 +108,7 @@ export function Hero({ onOpenAccessModal }: HeroProps) {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="mt-8"
+          className="mt-6 md:mt-8"
         >
           <HeroCommandCenter />
         </motion.div>

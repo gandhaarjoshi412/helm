@@ -49,7 +49,7 @@ export function DifferenceSection() {
   ];
 
   return (
-    <section id="how-it-works" className="relative py-32 bg-black dark:bg-black light:bg-slate-50/80 border-t border-white/[0.06] dark:border-white/[0.06] light:border-slate-200 overflow-hidden">
+    <section id="difference" className="relative py-32 bg-black dark:bg-black light:bg-slate-50/80 border-t border-white/[0.06] dark:border-white/[0.06] light:border-slate-200 overflow-hidden">
       {/* Background Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[550px] bg-gradient-to-r from-white/[0.02] to-transparent rounded-full blur-[170px] pointer-events-none -z-10" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

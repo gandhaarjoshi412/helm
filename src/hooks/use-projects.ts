@@ -19,16 +19,18 @@ export function useProjects() {
       if (data.length > 0 && !selectedProject) {
         setSelectedProject(data[0]);
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to load projects");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load projects");
     } finally {
       setIsLoading(false);
     }
   }, [selectedProject]);
 
   useEffect(() => {
-    loadProjects();
-  }, []);
+    queueMicrotask(() => {
+      loadProjects();
+    });
+  }, [loadProjects]);
 
   const addProject = async (name: string, repoPath: string, gitUrl?: string) => {
     try {
@@ -40,7 +42,7 @@ export function useProjects() {
       setProjects((prev) => [newProj, ...prev]);
       setSelectedProject(newProj);
       return newProj;
-    } catch (err: any) {
+    } catch (err) {
       throw err;
     }
   };

@@ -21,11 +21,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const supabase = createClient();
+  const [loading, setLoading] = useState(() => !!supabase);
 
   useEffect(() => {
     // Purge any stale demo user session from browser localStorage
@@ -34,7 +33,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!supabase) {
-      setLoading(false);
       return;
     }
 
@@ -269,6 +267,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithEmail,
         signUpWithEmail,
         signInWithMagicLink,
+        signInWithPhone,
+        verifyPhoneOtp,
         signInWithGithub,
         signOut,
         deleteAccount,

@@ -15,8 +15,29 @@ export function PhoneFrame({
   children,
   className,
   statusText = "LIVE",
-  time = "10:42",
+  time,
 }: PhoneFrameProps) {
+  const [displayTime, setDisplayTime] = React.useState<string>("");
+
+  React.useEffect(() => {
+    if (time) return;
+    const update = () => {
+      const now = new Date();
+      setDisplayTime(
+        now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+      );
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [time]);
+
+  const effectiveTime = time || displayTime;
+
   return (
     <div className={cn("w-full sm:w-[340px] mx-auto", className)}>
       {/* Desktop & Tablet: Full Hardware Simulated Phone Chassis */}
@@ -41,7 +62,7 @@ export function PhoneFrame({
           {/* Android Status Bar */}
           <div className="pt-3 px-5 pb-1 flex items-center justify-between text-[11px] text-zinc-400 select-none bg-black z-30 font-mono relative">
             <div className="flex items-center gap-2 pl-1">
-              <span className="font-bold text-white text-[12px] font-sans tracking-tight">{time}</span>
+              <span suppressHydrationWarning className="font-bold text-white text-[12px] font-sans tracking-tight">{effectiveTime}</span>
               <div className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded-full border border-white/10 text-[9px] text-zinc-300 font-bold">
                 <StatusDot status="healthy" size="sm" pulse={false} />
                 <span>{statusText}</span>

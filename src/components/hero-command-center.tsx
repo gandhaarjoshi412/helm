@@ -36,6 +36,24 @@ export function HeroCommandCenter() {
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [activeLeftTab, setActiveLeftTab] = useState<string>("agents");
   const [showDiffModal, setShowDiffModal] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        })
+      );
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-play loop cycle
   useEffect(() => {
@@ -79,92 +97,10 @@ export function HeroCommandCenter() {
 
   return (
     <div className="w-full relative select-none">
-      {/* Interactive Step Scrubber Bar in Pill Capsule Design */}
-      <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 px-3 sm:px-4 py-2.5 rounded-2xl bg-zinc-950/60 dark:bg-zinc-950/60 light:bg-white/90 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 dark:border-white/20 light:border-slate-300 shadow-[0_16px_40px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.3)] font-mono text-xs text-zinc-300 transition-all duration-300 overflow-hidden">
-        {/* Top Rim Glass Sheen Highlight */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
-        <div className="flex items-center gap-2 z-10 overflow-x-auto no-scrollbar w-full sm:w-auto">
-          <span className="text-[11px] uppercase tracking-wider font-bold text-zinc-300 dark:text-zinc-300 light:text-slate-700 mr-1 hidden sm:inline shrink-0">
-            INTERACTIVE CYCLE:
-          </span>
-          <div className="relative inline-flex items-center gap-1 p-1 rounded-xl sm:rounded-full bg-zinc-950/80 dark:bg-zinc-950/80 light:bg-slate-100 border border-white/15 dark:border-white/15 light:border-slate-300 backdrop-blur-md overflow-x-auto no-scrollbar shrink-0 max-w-full">
-            {[
-              { label: "1. Investigate", id: 0 },
-              { label: "2. Review Ready", id: 1 },
-              { label: "3. Mobile Approve", id: 2 },
-              { label: "4. Verify & Test", id: 3 },
-              { label: "5. Shipped", id: 4 },
-            ].map((item) => {
-              const isActive = step === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setStep(item.id);
-                    setIsPlaying(false);
-                  }}
-                  className={cn(
-                    "relative px-3 sm:px-4 py-1.5 text-[10.5px] sm:text-xs font-mono font-medium tracking-wide transition-all duration-300 cursor-pointer rounded-lg sm:rounded-full select-none flex flex-col items-center justify-center group z-10 shrink-0 whitespace-nowrap",
-                    isActive
-                      ? "text-white dark:text-white light:text-slate-900 font-semibold drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]"
-                      : "text-zinc-400 dark:text-zinc-400 light:text-slate-600 hover:text-zinc-100 dark:hover:text-zinc-100 light:hover:text-slate-900"
-                  )}
-                >
-                  <span className="relative z-10">{item.label}</span>
-
-                  {/* Animated Glass Capsule Background Pill */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeCycleTabGlassCapsule"
-                      transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 30,
-                        mass: 0.8,
-                      }}
-                      className="absolute inset-0 rounded-lg sm:rounded-full bg-white/[0.14] dark:bg-white/[0.14] light:bg-slate-200/80 border border-white/30 dark:border-white/30 light:border-slate-400/50 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.12),inset_0_1px_0_rgba(255,255,255,0.4)] -z-0"
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 z-10">
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] dark:bg-white/[0.06] light:bg-white hover:bg-white/[0.12] dark:hover:bg-white/[0.12] border border-white/20 dark:border-white/20 light:border-slate-300 text-zinc-200 dark:text-zinc-200 light:text-slate-800 hover:text-white dark:hover:text-white transition-all font-mono text-xs backdrop-blur-md shadow-[0_4px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] cursor-pointer"
-            title={isPlaying ? "Pause auto sequence" : "Play auto sequence"}
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[11px] font-bold">Pause</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[11px] font-bold">Play Loop</span>
-              </>
-            )}
-          </button>
-          <button
-            onClick={() => {
-              setStep(0);
-              setIsPlaying(true);
-            }}
-            className="p-1.5 rounded-lg bg-white/[0.06] dark:bg-white/[0.06] light:bg-white hover:bg-white/[0.12] dark:hover:bg-white/[0.12] border border-white/20 dark:border-white/20 light:border-slate-300 text-zinc-400 dark:text-zinc-400 light:text-slate-600 hover:text-zinc-100 dark:hover:text-zinc-100 transition-all backdrop-blur-md shadow-[0_4px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] cursor-pointer"
-            title="Reset to beginning"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
 
       {/* Main Dual Stage: Desktop Command Center (70%) + Mobile Command Surface (30%) */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* DESKTOP COMMAND CENTER with Silky 3D Tilt */}
         <motion.div
           whileHover={{
@@ -173,15 +109,15 @@ export function HeroCommandCenter() {
             rotateY: -1.2,
             transition: { type: "spring", stiffness: 140, damping: 20, mass: 0.8 },
           }}
-          className="xl:col-span-8 rounded-2xl bg-white dark:bg-black border border-slate-200 dark:border-white/[0.1] shadow-xl dark:shadow-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer"
+          className="lg:col-span-7 xl:col-span-8 rounded-2xl bg-white dark:bg-black border border-slate-200 dark:border-white/[0.1] shadow-xl dark:shadow-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer"
         >
           {/* Top Command Bar */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-white/[0.08] bg-slate-100/90 dark:bg-black/90 font-mono">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-zinc-700/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-zinc-700/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-zinc-700/80" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56] shadow-xs" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e] shadow-xs" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f] shadow-xs" />
               </div>
 
               <div className="h-4 w-px bg-slate-300 dark:bg-white/10 mx-1" />
@@ -282,7 +218,7 @@ export function HeroCommandCenter() {
                 {/* Live Activity Telemetry Log */}
                 <div className="space-y-2.5 text-xs font-mono">
                   <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-zinc-950/80 border border-slate-200 dark:border-white/[0.06] text-slate-800 dark:text-zinc-300 shadow-xs">
-                    <span className="text-slate-400 dark:text-zinc-500 font-bold">[10:42:13]</span>{" "}
+                    <span suppressHydrationWarning className="text-slate-400 dark:text-zinc-500 font-bold">[{currentTime || "00:00:00"}]</span>{" "}
                     <span className="text-amber-600 dark:text-amber-300 font-bold">Investigating checkout failure...</span>
                   </div>
 
@@ -455,7 +391,7 @@ export function HeroCommandCenter() {
         </motion.div>
 
         {/* MOBILE COMMAND SURFACE (Beside Desktop) */}
-        <div className="xl:col-span-4 flex flex-col items-center">
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col items-center">
           <div className="w-full flex items-center justify-between px-2 mb-2">
             <span className="text-xs font-mono text-slate-600 dark:text-zinc-400 font-bold flex items-center gap-1.5">
               <Smartphone className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300" />
@@ -466,7 +402,7 @@ export function HeroCommandCenter() {
             </span>
           </div>
 
-          <PhoneFrame statusText="SYNCED" time="10:42">
+          <PhoneFrame statusText="SYNCED">
             <div className="p-4 flex-col justify-between h-full flex font-mono">
               {/* Phone Header */}
               <div>

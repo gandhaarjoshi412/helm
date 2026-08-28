@@ -8,7 +8,6 @@ import {
   Zap,
   Loader2,
   Wand2,
-  Square,
   StopCircle,
 } from "lucide-react";
 import { TaskMode } from "@/types/api";
@@ -66,24 +65,24 @@ export function TaskDispatchBar({
   const isBusy = isRunning || isLoading;
 
   return (
-    <div className="bg-[#0f1017] border border-white/10 rounded-xl p-4 shadow-2xl relative overflow-hidden">
-      {/* Top Bar: Mode Selector & Quick Templates */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-        {/* Mode Selector */}
-        <div className="flex items-center gap-1 bg-[#141622] p-1 rounded-lg border border-white/5 text-xs font-mono">
+    <div className="bg-[#08090f]/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-5 sm:p-7 shadow-[0_30px_70px_rgba(0,0,0,0.95),inset_0_1px_1px_rgba(255,255,255,0.2)] relative overflow-hidden font-sans space-y-4">
+      {/* Top Bar: Mode Selector & Status */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Mode Selector Group */}
+        <div className="flex items-center gap-1.5 bg-[#030305] p-1.5 rounded-2xl border border-white/20 text-xs font-sans shadow-inner">
           <button
             type="button"
             disabled={isBusy}
             onClick={() => setMode("autonomous")}
             className={cn(
-              "px-3 py-1 rounded-md transition-all flex items-center gap-1.5",
+              "px-4 py-2 rounded-xl transition-all flex items-center gap-2 font-bold cursor-pointer text-xs sm:text-sm tracking-tight",
               mode === "autonomous"
-                ? "bg-indigo-600 text-white shadow-sm font-semibold"
-                : "text-zinc-400 hover:text-zinc-200",
+                ? "bg-white text-black border border-white shadow-[0_0_20px_rgba(255,255,255,0.35)]"
+                : "text-zinc-400 hover:text-white hover:bg-white/10",
               isBusy && "opacity-60 cursor-not-allowed"
             )}
           >
-            <Zap className="w-3.5 h-3.5" />
+            <Zap className="w-4 h-4 fill-current shrink-0" />
             <span>Autonomous</span>
           </button>
 
@@ -92,14 +91,14 @@ export function TaskDispatchBar({
             disabled={isBusy}
             onClick={() => setMode("guided")}
             className={cn(
-              "px-3 py-1 rounded-md transition-all flex items-center gap-1.5",
+              "px-4 py-2 rounded-xl transition-all flex items-center gap-2 font-bold cursor-pointer text-xs sm:text-sm tracking-tight",
               mode === "guided"
-                ? "bg-indigo-600 text-white shadow-sm font-semibold"
-                : "text-zinc-400 hover:text-zinc-200",
+                ? "bg-white text-black border border-white shadow-[0_0_20px_rgba(255,255,255,0.35)]"
+                : "text-zinc-400 hover:text-white hover:bg-white/10",
               isBusy && "opacity-60 cursor-not-allowed"
             )}
           >
-            <Bot className="w-3.5 h-3.5" />
+            <Bot className="w-4 h-4 shrink-0" />
             <span>Guided</span>
           </button>
 
@@ -108,36 +107,36 @@ export function TaskDispatchBar({
             disabled={isBusy}
             onClick={() => setMode("assist")}
             className={cn(
-              "px-3 py-1 rounded-md transition-all flex items-center gap-1.5",
+              "px-4 py-2 rounded-xl transition-all flex items-center gap-2 font-bold cursor-pointer text-xs sm:text-sm tracking-tight",
               mode === "assist"
-                ? "bg-indigo-600 text-white shadow-sm font-semibold"
-                : "text-zinc-400 hover:text-zinc-200",
+                ? "bg-white text-black border border-white shadow-[0_0_20px_rgba(255,255,255,0.35)]"
+                : "text-zinc-400 hover:text-white hover:bg-white/10",
               isBusy && "opacity-60 cursor-not-allowed"
             )}
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-4 h-4 shrink-0" />
             <span>Assist</span>
           </button>
         </div>
 
-        {/* Status Pill */}
-        <span className="text-[11px] font-mono text-zinc-400 hidden sm:flex items-center gap-2">
+        {/* Status Description */}
+        <span className="text-xs sm:text-sm text-zinc-300 font-medium hidden sm:flex items-center gap-2 font-sans">
           {isBusy ? (
-            <span className="text-amber-300 flex items-center gap-1.5 animate-pulse">
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-              Agent running... Click Abort to cancel anytime
+            <span className="text-amber-300 flex items-center gap-2 animate-pulse font-bold">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+              Agent executing intent... Click Abort to cancel anytime
             </span>
           ) : (
-            <span>
-              {mode === "autonomous" && "⚡ Full auto: Recon → Plan → Edit → Verify → Gate"}
-              {mode === "guided" && "🛡️ Human checks plan before executing file changes"}
-              {mode === "assist" && "🤝 Pair mode with real-time feedback loops"}
+            <span className="flex items-center gap-2 text-zinc-300 font-semibold">
+              {mode === "autonomous" && "⚡ Full Auto: Recon → Plan → Code → Test → Approval Gate"}
+              {mode === "guided" && "🛡️ Guided: Human reviews plan before executing changes"}
+              {mode === "assist" && "🤝 Pair Mode: Real-time interactive feedback loops"}
             </span>
           )}
         </span>
       </div>
 
-      {/* Prompt Text Area */}
+      {/* Prompt Input Box */}
       <div className="relative">
         <textarea
           rows={3}
@@ -146,23 +145,23 @@ export function TaskDispatchBar({
           onKeyDown={handleKeyDown}
           disabled={disabled || isBusy}
           placeholder="Describe engineering task (e.g. 'Investigate flaky payment test, fix the retry logic, run pytest and verify diff')..."
-          className="w-full bg-[#141520] border border-white/10 rounded-lg p-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/40 font-mono resize-none transition-colors disabled:opacity-75"
+          className="w-full bg-[#030305] border border-white/25 focus:border-white focus:ring-1 focus:ring-white rounded-2xl p-3.5 sm:p-5 pb-14 sm:pb-5 sm:pr-44 text-xs sm:text-base text-white placeholder:text-zinc-500 font-sans leading-relaxed transition-all outline-none resize-none disabled:opacity-70 shadow-inner"
         />
 
-        {/* Dynamic Action Button (Transforms between Execute Intent and Abort) */}
-        <div className="absolute right-3 bottom-3 flex items-center gap-2">
+        {/* Action Button (Positioned cleanly inside bottom right) */}
+        <div className="absolute right-3 bottom-3 sm:right-3.5 sm:bottom-3.5 flex items-center gap-2">
           {isBusy ? (
             <button
               onClick={handleAbort}
               type="button"
               disabled={isAborting}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-mono font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/40 border border-rose-400/40 transition-all cursor-pointer animate-pulse"
+              className="flex items-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-sans font-bold bg-rose-500 hover:bg-rose-600 text-white shadow-lg border border-rose-400 transition-all cursor-pointer animate-pulse"
               title="Stop agent execution immediately"
             >
               {isAborting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
               ) : (
-                <StopCircle className="w-3.5 h-3.5" />
+                <StopCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               )}
               <span>{isAborting ? "Aborting..." : "Abort"}</span>
             </button>
@@ -172,13 +171,13 @@ export function TaskDispatchBar({
               disabled={!prompt.trim() || disabled}
               type="button"
               className={cn(
-                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-mono font-medium shadow-md transition-all",
+                "flex items-center gap-1.5 sm:gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-sans font-extrabold transition-all border cursor-pointer",
                 !prompt.trim() || disabled
-                  ? "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
-                  : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30 hover:shadow-indigo-600/50 cursor-pointer"
+                  ? "bg-white/10 text-zinc-500 border-white/10 cursor-not-allowed"
+                  : "bg-white text-black border-white hover:bg-zinc-100 shadow-[0_0_25px_rgba(255,255,255,0.35)] glow-primary"
               )}
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
+              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
               <span>Execute Intent</span>
             </button>
           )}
@@ -186,9 +185,9 @@ export function TaskDispatchBar({
       </div>
 
       {/* Suggested Prompt Chips */}
-      <div className="mt-3 flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-mono text-zinc-400 no-scrollbar">
-        <span className="text-zinc-600 flex items-center gap-1 whitespace-nowrap">
-          <Wand2 className="w-3 h-3 text-indigo-400" /> Templates:
+      <div className="flex items-center gap-2 overflow-x-auto pb-0.5 text-xs sm:text-sm text-zinc-400 no-scrollbar font-sans">
+        <span className="text-zinc-300 flex items-center gap-1.5 font-bold whitespace-nowrap">
+          <Wand2 className="w-4 h-4 text-white" /> Templates:
         </span>
         {promptTemplates.map((tpl, i) => (
           <button
@@ -196,7 +195,7 @@ export function TaskDispatchBar({
             type="button"
             disabled={isBusy}
             onClick={() => setPrompt(tpl)}
-            className="whitespace-nowrap bg-white/5 hover:bg-white/10 hover:text-indigo-300 border border-white/5 px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
+            className="whitespace-nowrap bg-white/5 hover:bg-white/15 hover:text-white border border-white/15 hover:border-white/35 px-4 py-2 rounded-xl transition-all disabled:opacity-50 cursor-pointer text-xs sm:text-sm font-sans font-medium text-zinc-300"
           >
             {tpl}
           </button>

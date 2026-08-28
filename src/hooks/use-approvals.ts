@@ -15,15 +15,17 @@ export function useApprovals() {
     try {
       const data = await fetchApprovals("pending");
       setApprovals(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to load approvals");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load approvals");
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadApprovals();
+    queueMicrotask(() => {
+      loadApprovals();
+    });
     const interval = setInterval(loadApprovals, 5000);
     return () => clearInterval(interval);
   }, [loadApprovals]);
@@ -33,7 +35,7 @@ export function useApprovals() {
       const updated = await approveAction(id, { approved: true, comment });
       setApprovals((prev) => prev.filter((a) => a.id !== id && a.task_id !== id));
       return updated;
-    } catch (err: any) {
+    } catch (err) {
       console.error("Approve action error:", err);
       throw err;
     }
@@ -44,7 +46,7 @@ export function useApprovals() {
       const updated = await rejectAction(id, { approved: false, comment });
       setApprovals((prev) => prev.filter((a) => a.id !== id && a.task_id !== id));
       return updated;
-    } catch (err: any) {
+    } catch (err) {
       console.error("Reject action error:", err);
       throw err;
     }

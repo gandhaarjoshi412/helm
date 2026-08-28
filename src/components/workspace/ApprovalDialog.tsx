@@ -31,9 +31,9 @@ export function ApprovalDialog({
   if (!approvalEvent) return null;
 
   const metadata = approvalEvent.metadata || {};
-  const actionType = metadata.action_type || approvalEvent.tool_name || "Gated Action";
-  const branch = metadata.branch || "fix/autonomous-patch";
-  const commitMsg = metadata.commit_message || "feat: apply validated changes";
+  const actionType = String(metadata.action_type || approvalEvent.tool_name || "Gated Action");
+  const branch = String(metadata.branch || "fix/autonomous-patch");
+  const commitMsg = String(metadata.commit_message || "feat: apply validated changes");
 
   const handleApprove = async () => {
     setIsSubmitting(true);

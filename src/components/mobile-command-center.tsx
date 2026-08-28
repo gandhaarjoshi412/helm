@@ -155,7 +155,7 @@ export function MobileCommandCenter() {
 
           {/* Right Column: Interactive Phone Screen Simulation (5 cols) */}
           <div className="lg:col-span-5 flex justify-center">
-            <PhoneFrame statusText="KODIUM OS" time="10:42">
+            <PhoneFrame statusText="KODIUM OS">
               {/* Screen 0: Incident Triage */}
               {activeScreen === 0 && (
                 <div className="p-4 flex flex-col justify-between h-full font-mono text-xs">
@@ -166,7 +166,7 @@ export function MobileCommandCenter() {
                         <AlertTriangle className="w-3.5 h-3.5" />
                         Production Incident
                       </span>
-                      <span className="text-zinc-500 text-[10px]">10:42 PM</span>
+                      <span className="text-zinc-500 text-[10px]">Just now</span>
                     </div>
 
                     {/* Alert summary card */}

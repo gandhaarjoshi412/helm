@@ -34,7 +34,7 @@ export function ProblemSection() {
   ];
 
   return (
-    <section id="how-it-works" className="relative py-28 border-t border-white/[0.06] dark:border-white/[0.06] light:border-slate-200 bg-black dark:bg-black light:bg-slate-50 overflow-hidden">
+    <section id="problem" className="relative py-28 border-t border-white/[0.06] dark:border-white/[0.06] light:border-slate-200 bg-black dark:bg-black light:bg-slate-50 overflow-hidden">
       {/* Background Ambient Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-white/[0.02] to-transparent rounded-full blur-[140px] pointer-events-none -z-10" />
 

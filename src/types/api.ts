@@ -29,7 +29,7 @@ export interface Project {
   indexed_at?: string | null;
   created_at: string;
   updated_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface Task {
@@ -43,8 +43,8 @@ export interface Task {
   started_at?: string | null;
   completed_at?: string | null;
   error?: string | null;
-  plan?: Record<string, any> | null;
-  metadata?: Record<string, any>;
+  plan?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AgentEvent {
@@ -57,11 +57,11 @@ export interface AgentEvent {
   title: string;
   summary: string;
   tool_name?: string | null;
-  tool_input?: Record<string, any> | null;
-  tool_output?: Record<string, any> | null;
+  tool_input?: Record<string, unknown> | null;
+  tool_output?: Record<string, unknown> | null;
   duration_ms?: number | null;
   status: EventStatus;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ApprovalRequest {
@@ -70,7 +70,7 @@ export interface ApprovalRequest {
   run_id: string;
   action_type: string;
   description: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   status: ApprovalStatus;
   requested_at: string;
   resolved_at?: string | null;
@@ -100,7 +100,7 @@ export interface TaskChangesResponse {
   total_additions?: number;
   total_deletions?: number;
   raw_diff?: string;
-  files?: any[];
+  files?: unknown[];
   unified_diff?: string;
 }
 
@@ -119,7 +119,7 @@ export interface CodeGraphNode {
   id: string;
   type: "file" | "symbol";
   label: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CodeGraphEdge {
