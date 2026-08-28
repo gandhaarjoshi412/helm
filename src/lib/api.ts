@@ -9,18 +9,46 @@ import {
   SymbolInfo,
   DirectoryBrowseResponse,
 } from "@/types/api";
+import { createClient } from "@/lib/supabase/client";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const API_KEY = process.env.NEXT_PUBLIC_HELM_API_KEY || "";
+
+/**
+ * Retrieves active Supabase access token or local developer session token
+ */
+export async function getAuthToken(): Promise<string> {
+  if (typeof window === "undefined") return "";
+  try {
+    const supabase = createClient();
+    if (supabase) {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session?.access_token) {
+        return data.session.access_token;
+      }
+    }
+    const stored = localStorage.getItem("kodium_developer_session");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed?.session?.access_token) {
+        return parsed.session.access_token;
+      }
+    }
+  } catch (_e) {
+    // Ignore
+  }
+  return "";
+}
 
 async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
+  const authToken = await getAuthToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(API_KEY ? { "X-API-Key": API_KEY } : {}),
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : (API_KEY ? { "X-API-Key": API_KEY } : {})),
     ...((options.headers as Record<string, string>) || {}),
   };
 
@@ -59,8 +87,11 @@ export async function checkBackendHealth(): Promise<{ status: string; service: s
 // System / Directory Picker API
 // ----------------------------------------------------
 
-export async function browseDirectories(path?: string): Promise<DirectoryBrowseResponse> {
-  const query = path ? `?path=${encodeURIComponent(path)}` : "";
+export async function browseDirectories(path?: string, projectId?: string): Promise<DirectoryBrowseResponse> {
+  const params = new URLSearchParams();
+  if (path) params.append("path", path);
+  if (projectId) params.append("project_id", projectId);
+  const query = params.toString() ? `?${params.toString()}` : "";
   return request<DirectoryBrowseResponse>(`/api/system/browse${query}`);
 }
 
@@ -78,14 +109,59 @@ export async function fetchProject(id: string): Promise<Project> {
 
 export async function createProject(payload: {
   name: string;
-  repo_path: string;
+  repo_path?: string;
   git_url?: string;
   default_branch?: string;
+  description?: string;
 }): Promise<Project> {
   return request<Project>("/api/projects", {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export async function createProjectWithFiles(
+  name: string,
+  files: { file: File; relativePath: string }[],
+  gitUrl?: string
+): Promise<Project> {
+  const url = `${API_BASE_URL}/api/projects/upload`;
+  const authToken = await getAuthToken();
+  const formData = new FormData();
+  formData.append("name", name);
+  if (gitUrl) formData.append("git_url", gitUrl);
+
+  const pathMap: string[] = [];
+  files.forEach((f) => {
+    formData.append("files", f.file);
+    pathMap.push(f.relativePath);
+  });
+  formData.append("paths", JSON.stringify(pathMap));
+
+  const headers: Record<string, string> = {
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : (API_KEY ? { "X-API-Key": API_KEY } : {})),
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (!res.ok) {
+    let errorMessage = `HTTP ${res.status} ${res.statusText}`;
+    try {
+      const errorData = await res.json();
+      if (errorData?.detail) {
+        errorMessage = typeof errorData.detail === "string" ? errorData.detail : JSON.stringify(errorData.detail);
+      }
+    } catch {
+      // Fallback
+    }
+    throw new Error(errorMessage);
+  }
+
+  return (await res.json()) as Project;
 }
 
 // ----------------------------------------------------

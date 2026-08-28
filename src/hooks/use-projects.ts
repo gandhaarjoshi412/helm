@@ -32,13 +32,29 @@ export function useProjects() {
     });
   }, [loadProjects]);
 
-  const addProject = async (name: string, repoPath: string, gitUrl?: string) => {
+  const addProject = async (name: string, repoPath?: string, gitUrl?: string) => {
     try {
       const newProj = await createProject({
         name,
         repo_path: repoPath,
         git_url: gitUrl,
       });
+      setProjects((prev) => [newProj, ...prev]);
+      setSelectedProject(newProj);
+      return newProj;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const addProjectWithFiles = async (
+    name: string,
+    files: { file: File; relativePath: string }[],
+    gitUrl?: string
+  ) => {
+    try {
+      const { createProjectWithFiles } = await import("@/lib/api");
+      const newProj = await createProjectWithFiles(name, files, gitUrl);
       setProjects((prev) => [newProj, ...prev]);
       setSelectedProject(newProj);
       return newProj;
@@ -55,5 +71,6 @@ export function useProjects() {
     error,
     reloadProjects: loadProjects,
     addProject,
+    addProjectWithFiles,
   };
 }

@@ -83,18 +83,7 @@ export function useTaskStream(taskId: string | null | undefined) {
       });
     });
 
-    const tokenQuery = API_KEY ? `?token=${encodeURIComponent(API_KEY)}` : "";
-    const url = `${API_BASE_URL}/api/tasks/${taskId}/events${tokenQuery}`;
-    const es = new EventSource(url);
-    eventSourceRef.current = es;
-
-    es.onopen = () => {
-      setState((prev) => ({
-        ...prev,
-        isConnected: true,
-        status: prev.status === "connecting" ? "running" : prev.status,
-      }));
-    };
+    let isCancelled = false;
 
     const handleIncomingEvent = (eventData: string) => {
       try {
@@ -173,53 +162,83 @@ export function useTaskStream(taskId: string | null | undefined) {
       }
     };
 
-    // Generic onmessage
-    es.onmessage = (e) => {
-      handleIncomingEvent(e.data);
-    };
+    const connectSSE = async () => {
+      const { getAuthToken } = await import("@/lib/api");
+      const authToken = (await getAuthToken()) || API_KEY;
+      const tokenQuery = authToken ? `?token=${encodeURIComponent(authToken)}` : "";
+      const url = `${API_BASE_URL}/api/tasks/${taskId}/events${tokenQuery}`;
 
-    // Listen to specific named events
-    const eventTypes = [
-      "run_started",
-      "phase_started",
-      "phase_completed",
-      "context_search",
-      "file_read",
-      "file_modified",
-      "tool_started",
-      "tool_completed",
-      "command_started",
-      "command_completed",
-      "test_started",
-      "test_completed",
-      "agent_message",
-      "verification_started",
-      "verification_completed",
-      "self_correction",
-      "review_started",
-      "review_completed",
-      "approval_required",
-      "approval_resolved",
-      "run_completed",
-      "run_failed",
-    ];
+      if (isCancelled) return;
+      const es = new EventSource(url);
+      eventSourceRef.current = es;
 
-    eventTypes.forEach((type) => {
-      es.addEventListener(type, (e: MessageEvent) => {
-        handleIncomingEvent(e.data);
+      es.onopen = () => {
+        setState((prev) => ({
+          ...prev,
+          isConnected: true,
+          status: prev.status === "connecting" ? "running" : prev.status,
+        }));
+      };
+
+      es.onmessage = (event) => {
+        if (event.data) {
+          handleIncomingEvent(event.data);
+        }
+      };
+
+      es.onerror = (err) => {
+        console.warn(`[SSE Stream] Error for task ${taskId}:`, err);
+        setState((prev) => ({
+          ...prev,
+          isConnected: false,
+          status:
+            prev.status === "completed" || prev.status === "failed"
+              ? prev.status
+              : "running",
+        }));
+      };
+
+      // Listen to specific named events
+      const eventTypes = [
+        "run_started",
+        "phase_started",
+        "phase_completed",
+        "context_search",
+        "file_read",
+        "file_modified",
+        "tool_started",
+        "tool_completed",
+        "command_started",
+        "command_completed",
+        "test_started",
+        "test_completed",
+        "agent_message",
+        "verification_started",
+        "verification_completed",
+        "self_correction",
+        "review_started",
+        "review_completed",
+        "approval_required",
+        "approval_resolved",
+        "run_completed",
+        "run_failed",
+      ];
+
+      eventTypes.forEach((type) => {
+        es.addEventListener(type, (e: MessageEvent) => {
+          handleIncomingEvent(e.data);
+        });
       });
-    });
-
-    es.onerror = (_err) => {
-      setState((prev) => ({
-        ...prev,
-        isConnected: false,
-      }));
     };
+
+    connectSSE();
 
     return () => {
-      es.close();
-      eventSourceRef.current = null;
+      isCancelled = true;
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
     };
   }, [taskId, resetState]);
 

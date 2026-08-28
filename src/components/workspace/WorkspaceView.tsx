@@ -362,10 +362,8 @@ export function WorkspaceView() {
       <NewProjectModal
         isOpen={isNewProjectModalOpen}
         onClose={() => setIsNewProjectModalOpen(false)}
-        onCreate={async (name, path, gitUrl) => {
-          const p = await addProject(name, path, gitUrl);
+        onSuccess={async () => {
           await reloadProjects();
-          return p;
         }}
       />
 
