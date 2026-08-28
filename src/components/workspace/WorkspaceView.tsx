@@ -172,6 +172,7 @@ export function WorkspaceView() {
           onSelectTab={setSidebarTab}
           mobileOpen={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
+          projectId={selectedProject?.id}
         />
 
         {/* Central Command Center Content Area */}

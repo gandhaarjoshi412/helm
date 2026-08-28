@@ -18,11 +18,14 @@ import {
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { useSystemMetrics } from "@/hooks/use-system-metrics";
+
 interface WorkspaceSidebarProps {
   activeTab: string;
   onSelectTab: (tab: string) => void;
   mobileOpen?: boolean;
   onCloseMobile?: () => void;
+  projectId?: string;
 }
 
 export function WorkspaceSidebar({
@@ -30,7 +33,10 @@ export function WorkspaceSidebar({
   onSelectTab,
   mobileOpen = false,
   onCloseMobile,
+  projectId,
 }: WorkspaceSidebarProps) {
+  const { metrics, isLoading } = useSystemMetrics(projectId);
+
   const navItems = [
     { id: "agents", label: "Active Agents", icon: Bot, badge: "LIVE" },
     { id: "codebase", label: "Codebase Index", icon: Terminal },
@@ -39,6 +45,18 @@ export function WorkspaceSidebar({
     { id: "vector", label: "Vector Store", icon: Network },
     { id: "logs", label: "System Logs", icon: FileText },
   ];
+
+  const vectorStore = metrics?.vector_store || {
+    used: "64.0 KB",
+    total: "500 MB",
+    percentage: 1.2,
+  };
+
+  const memoryBank = metrics?.memory_bank || {
+    used: "114.1 MB",
+    total: "1.0 GB",
+    percentage: 11.1,
+  };
 
   const sidebarContent = (
     <aside className="w-64 md:w-56 bg-[#050508]/98 backdrop-blur-2xl border-r border-white/10 flex flex-col justify-between shrink-0 font-sans text-xs select-none h-full">
@@ -51,31 +69,40 @@ export function WorkspaceSidebar({
                 <Cpu className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h2 className="font-bold text-sm text-white tracking-tight">THE BRAIN</h2>
-                <span className="text-[9px] text-zinc-400 font-mono tracking-wider">V.2.4-ALPHA</span>
+                <h2 className="font-bold text-white tracking-wide text-xs">
+                  THE BRAIN
+                </h2>
+                <span className="text-[10px] text-zinc-500 font-mono">
+                  v0.1.0-alpha
+                </span>
               </div>
             </div>
+
             {onCloseMobile && (
               <button
                 onClick={onCloseMobile}
-                className="md:hidden text-zinc-400 hover:text-white p-1 rounded-lg bg-white/5"
+                className="md:hidden p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
 
-          <button className="w-full bg-white/5 border border-white/20 text-white font-mono text-[11px] font-semibold py-1.5 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Sync Core</span>
-          </button>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10 font-mono text-[10px]">
+            <div className="flex items-center gap-1.5 text-emerald-400">
+              <RefreshCw className="w-3 h-3 animate-spin duration-1000" />
+              <span>SYNC CORE</span>
+            </div>
+            <span className="text-zinc-500">CONNECTED</span>
+          </div>
         </div>
 
-        {/* Navigation List */}
+        {/* Middle Nav Items */}
         <nav className="p-2 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
+
             return (
               <button
                 key={item.id}
@@ -84,18 +111,33 @@ export function WorkspaceSidebar({
                   if (onCloseMobile) onCloseMobile();
                 }}
                 className={cn(
-                  "w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-all cursor-pointer font-sans text-[11px] uppercase tracking-wide",
+                  "w-full flex items-center justify-between px-3 py-2 rounded-lg font-medium transition-all text-left group cursor-pointer",
                   isActive
-                    ? "bg-white/10 text-white border-l-2 border-white font-semibold"
+                    ? "bg-white text-black font-bold shadow-md shadow-white/10"
                     : "text-zinc-400 hover:text-white hover:bg-white/5"
                 )}
               >
-                <div className="flex items-center gap-2">
-                  <Icon className="w-4 h-4" />
+                <div className="flex items-center gap-2.5">
+                  <Icon
+                    className={cn(
+                      "w-4 h-4 transition-colors",
+                      isActive
+                        ? "text-black stroke-[2.5]"
+                        : "text-zinc-500 group-hover:text-white"
+                    )}
+                  />
                   <span>{item.label}</span>
                 </div>
+
                 {item.badge && (
-                  <span className="text-[9px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded font-bold">
+                  <span
+                    className={cn(
+                      "text-[9px] px-1.5 py-0.5 rounded font-mono font-bold tracking-tight",
+                      isActive
+                        ? "bg-black text-emerald-400"
+                        : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    )}
+                  >
                     {item.badge}
                   </span>
                 )}
@@ -109,29 +151,49 @@ export function WorkspaceSidebar({
       <div className="border-t border-white/10 p-3.5 space-y-4">
         {/* Resource Usage Widget */}
         <div className="space-y-2.5">
-          <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-zinc-400 font-semibold">
-            <HardDrive className="w-3.5 h-3.5 text-white" />
-            <span>Resource Usage</span>
+          <div className="flex items-center justify-between text-[9px] uppercase tracking-widest text-zinc-400 font-semibold font-mono">
+            <div className="flex items-center gap-1.5">
+              <HardDrive className="w-3.5 h-3.5 text-white" />
+              <span>Resource Usage</span>
+            </div>
+            <span className="text-[8px] text-emerald-400 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              LIVE
+            </span>
           </div>
 
           <div className="space-y-2">
             <div>
               <div className="flex justify-between text-[9px] font-mono mb-1">
                 <span className="text-rose-300">Vector Store</span>
-                <span className="text-zinc-400">42.8 GB / 50 GB</span>
+                <span className="text-zinc-400 font-bold">
+                  {vectorStore.used} / {vectorStore.total}
+                </span>
               </div>
               <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-rose-400 w-[85%] shadow-[0_0_8px_rgba(244,63,94,0.4)]" />
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.max(vectorStore.percentage, 2)}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className="h-full bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.4)]"
+                />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-[9px] font-mono mb-1">
                 <span className="text-white">Memory Bank</span>
-                <span className="text-zinc-400">12.1 GB / 16 GB</span>
+                <span className="text-zinc-400 font-bold">
+                  {memoryBank.used} / {memoryBank.total}
+                </span>
               </div>
               <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-white w-[75%] shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.max(memoryBank.percentage, 3)}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className="h-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.4)]"
+                />
               </div>
             </div>
           </div>

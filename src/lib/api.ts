@@ -8,6 +8,7 @@ import {
   CodeGraphResponse,
   SymbolInfo,
   DirectoryBrowseResponse,
+  SystemMetricsResponse,
 } from "@/types/api";
 import { createClient } from "@/lib/supabase/client";
 
@@ -93,6 +94,11 @@ export async function browseDirectories(path?: string, projectId?: string): Prom
   if (projectId) params.append("project_id", projectId);
   const query = params.toString() ? `?${params.toString()}` : "";
   return request<DirectoryBrowseResponse>(`/api/system/browse${query}`);
+}
+
+export async function fetchSystemMetrics(projectId?: string): Promise<SystemMetricsResponse> {
+  const query = projectId ? `?project_id=${encodeURIComponent(projectId)}` : "";
+  return request<SystemMetricsResponse>(`/api/system/metrics${query}`);
 }
 
 // ----------------------------------------------------

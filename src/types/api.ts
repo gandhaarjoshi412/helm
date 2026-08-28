@@ -158,3 +158,21 @@ export interface DirectoryBrowseResponse {
   quick_locations: QuickLocation[];
   directories: DirectoryItem[];
 }
+
+export interface MetricItem {
+  label: string;
+  used: string;
+  total: string;
+  percentage: number;
+  raw_used: number;
+  raw_total: number;
+  unit: string;
+}
+
+export interface SystemMetricsResponse {
+  vector_store: MetricItem;
+  memory_bank: MetricItem;
+  storage: MetricItem;
+  active_tasks: number;
+  total_projects: number;
+}
