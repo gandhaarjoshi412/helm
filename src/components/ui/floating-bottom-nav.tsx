@@ -1,52 +1,40 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { Sparkles, Workflow, Brain, Bot, Smartphone, Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface NavItem {
-  name: string;
-  href: string;
-}
-
-const navLinks: NavItem[] = [
-  { name: "Product", href: "#demo" },
-  { name: "How it works", href: "#how-it-works" },
-  { name: "Brain", href: "#brain" },
-  { name: "Agent", href: "#agent" },
-  { name: "Mobile", href: "#mobile" },
-  { name: "Technology", href: "#architecture" },
+const NAV_LINKS = [
+  { name: "Product", href: "#demo", icon: Sparkles },
+  { name: "How it works", href: "#how-it-works", icon: Workflow },
+  { name: "Brain", href: "#brain", icon: Brain },
+  { name: "Agent", href: "#agent", icon: Bot },
+  { name: "Mobile", href: "#mobile", icon: Smartphone },
+  { name: "Technology", href: "#architecture", icon: Cpu },
 ];
 
 export function FloatingBottomNav() {
-  const [hoveredHref, setHoveredHref] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<string>("#demo");
+  const [activeNav, setActiveNav] = useState<string>("#demo");
 
   useEffect(() => {
-    const sectionIds = navLinks.map((link) => link.href.substring(1));
-    const observers: IntersectionObserver[] = [];
-
-    const handleIntersect = (entries: IntersectionObserverEntry[]) => {
+    const sectionIds = NAV_LINKS.map((link) => link.href.substring(1));
+    const observerCallback: IntersectionObserverCallback = (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          setActiveSection(`#${entry.target.id}`);
+          setActiveNav(`#${entry.target.id}`);
         }
       });
     };
 
-    const observerOptions = {
+    const observer = new IntersectionObserver(observerCallback, {
       root: null,
-      rootMargin: "-20% 0px -40% 0px",
-      threshold: 0.25,
-    };
-
-    const observer = new IntersectionObserver(handleIntersect, observerOptions);
+      rootMargin: "-25% 0px -40% 0px",
+      threshold: 0.15,
+    });
 
     sectionIds.forEach((id) => {
       const el = document.getElementById(id);
-      if (el) {
-        observer.observe(el);
-      }
+      if (el) observer.observe(el);
     });
 
     return () => observer.disconnect();
@@ -54,55 +42,40 @@ export function FloatingBottomNav() {
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    setActiveSection(href);
+    setActiveNav(href);
     const target = document.querySelector(href);
     if (target) {
       target.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  const currentDisplayHref = hoveredHref || activeSection;
-
   return (
-    <div className="fixed bottom-4 sm:bottom-7 left-1/2 -translate-x-1/2 z-50 px-2 sm:px-3 max-w-[96vw] sm:max-w-max pointer-events-auto">
-      {/* Outer Glassmorphic Container with Translucency & Specular Highlights */}
-      <div className="relative flex items-center gap-1 sm:gap-2 px-2.5 py-1.5 sm:px-5 sm:py-3 rounded-full bg-zinc-950/80 dark:bg-zinc-950/80 light:bg-white/90 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 dark:border-white/20 light:border-slate-300 shadow-[0_20px_50px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.3)] overflow-x-auto no-scrollbar max-w-[94vw] sm:max-w-none">
-        {/* Top Rim Glass Sheen Highlight */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+    <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto select-none max-w-[96vw] sm:max-w-max">
+      <div className="flex items-center gap-1 p-1.5 rounded-full bg-[#06070a]/90 border border-white/20 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] overflow-x-auto no-scrollbar max-w-full relative">
+        <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
 
-        {/* Navigation Links */}
-        {navLinks.map((link) => {
-          const isCurrentActive = currentDisplayHref === link.href;
-
+        {NAV_LINKS.map((link) => {
+          const isActive = activeNav === link.href;
+          const Icon = link.icon;
           return (
             <a
               key={link.name}
               href={link.href}
               onClick={(e) => handleNavClick(e, link.href)}
-              onMouseEnter={() => setHoveredHref(link.href)}
-              onMouseLeave={() => setHoveredHref(null)}
               className={cn(
-                "relative px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium tracking-wide transition-all duration-300 cursor-pointer rounded-full select-none flex items-center justify-center group z-10 shrink-0 whitespace-nowrap",
-                isCurrentActive
-                  ? "text-white dark:text-white light:text-slate-900 font-semibold drop-shadow-[0_0_12px_rgba(255,255,255,0.5)]"
-                  : "text-zinc-400 dark:text-zinc-400 light:text-slate-600 hover:text-zinc-100 dark:hover:text-zinc-100 light:hover:text-slate-900"
+                "relative px-3 sm:px-4 py-2 rounded-full transition-all duration-200 text-xs font-bold tracking-tight cursor-pointer whitespace-nowrap flex items-center gap-1.5 group select-none",
+                isActive
+                  ? "bg-white text-zinc-950 shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                  : "text-zinc-400 hover:text-white hover:bg-white/10"
               )}
             >
-              <span className="relative z-10">{link.name}</span>
-
-              {/* Animated Glass Capsule Background Pill */}
-              {isCurrentActive && (
-                <motion.div
-                  layoutId="activeBottomNavGlassCapsule"
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                    mass: 0.8,
-                  }}
-                  className="absolute inset-0 rounded-full bg-white/[0.14] dark:bg-white/[0.14] light:bg-slate-200/80 border border-white/30 dark:border-white/30 light:border-slate-400/50 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.12),inset_0_1px_0_rgba(255,255,255,0.4)] -z-0"
-                />
-              )}
+              <Icon
+                className={cn(
+                  "w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors duration-200 shrink-0",
+                  isActive ? "text-zinc-950" : "text-zinc-400 group-hover:text-white"
+                )}
+              />
+              <span className="hidden xs:inline sm:inline">{link.name}</span>
             </a>
           );
         })}
