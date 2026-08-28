@@ -105,12 +105,15 @@ export interface TaskChangesResponse {
 }
 
 export interface SymbolInfo {
-  id: string;
+  id?: string;
   name: string;
-  kind: "function" | "class" | "method" | "variable" | "interface" | "type" | "import";
-  file_path: string;
-  line_start: number;
-  line_end: number;
+  kind?: "function" | "class" | "method" | "variable" | "interface" | "type" | "import" | string;
+  type?: string;
+  file?: string;
+  file_path?: string;
+  lines?: string;
+  line_start?: number;
+  line_end?: number;
   docstring?: string | null;
   signature?: string | null;
 }

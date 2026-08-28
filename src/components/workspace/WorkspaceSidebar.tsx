@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Cpu,
   RefreshCw,
@@ -35,7 +35,7 @@ export function WorkspaceSidebar({
   onCloseMobile,
   projectId,
 }: WorkspaceSidebarProps) {
-  const { metrics, isLoading } = useSystemMetrics(projectId);
+  const { metrics, isLoading, reloadMetrics } = useSystemMetrics(projectId);
 
   const navItems = [
     { id: "agents", label: "Active Agents", icon: Bot, badge: "LIVE" },
@@ -45,6 +45,27 @@ export function WorkspaceSidebar({
     { id: "vector", label: "Vector Store", icon: Network },
     { id: "logs", label: "System Logs", icon: FileText },
   ];
+
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<"connected" | "syncing" | "synced">("connected");
+
+  const handleSync = async () => {
+    if (isSyncing || !projectId) return;
+    setIsSyncing(true);
+    setSyncStatus("syncing");
+    try {
+      const { syncProjectCodebase } = await import("@/lib/api");
+      await syncProjectCodebase(projectId);
+      await reloadMetrics();
+      setSyncStatus("synced");
+      setTimeout(() => setSyncStatus("connected"), 3000);
+    } catch (err) {
+      console.error("Sync error:", err);
+      setSyncStatus("connected");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const vectorStore = metrics?.vector_store || {
     used: "64.0 KB",
@@ -88,13 +109,23 @@ export function WorkspaceSidebar({
             )}
           </div>
 
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10 font-mono text-[10px]">
+          <button
+            type="button"
+            onClick={handleSync}
+            disabled={isSyncing || !projectId}
+            title={projectId ? "Click to Re-Index & Sync Project AST Code Graph" : "Select a project to sync"}
+            className="w-full flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all font-mono text-[10px] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
+          >
             <div className="flex items-center gap-1.5 text-emerald-400">
-              <RefreshCw className="w-3 h-3 animate-spin duration-1000" />
-              <span>SYNC CORE</span>
+              <RefreshCw className={cn("w-3 h-3", isSyncing ? "animate-spin text-cyan-400" : "group-hover:rotate-180 transition-transform duration-500")} />
+              <span className={cn(isSyncing && "text-cyan-400 font-bold")}>
+                {syncStatus === "syncing" ? "SYNCING..." : syncStatus === "synced" ? "SYNCED" : "SYNC CORE"}
+              </span>
             </div>
-            <span className="text-zinc-500">CONNECTED</span>
-          </div>
+            <span className="text-zinc-500 group-hover:text-zinc-300 text-[9px]">
+              {syncStatus === "synced" ? "UPDATED" : isSyncing ? "INDEXING" : "CONNECTED"}
+            </span>
+          </button>
         </div>
 
         {/* Middle Nav Items */}

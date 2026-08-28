@@ -63,6 +63,22 @@ export function useProjects() {
     }
   };
 
+  const removeProject = async (id: string) => {
+    try {
+      const { deleteProject } = await import("@/lib/api");
+      await deleteProject(id);
+      setProjects((prev) => {
+        const remaining = prev.filter((p) => p.id !== id);
+        if (selectedProject?.id === id) {
+          setSelectedProject(remaining.length > 0 ? remaining[0] : null);
+        }
+        return remaining;
+      });
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return {
     projects,
     selectedProject,
@@ -72,5 +88,6 @@ export function useProjects() {
     reloadProjects: loadProjects,
     addProject,
     addProjectWithFiles,
+    removeProject,
   };
 }

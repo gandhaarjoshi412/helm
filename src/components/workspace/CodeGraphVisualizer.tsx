@@ -46,7 +46,8 @@ export function CodeGraphVisualizer({ projectId }: CodeGraphVisualizerProps) {
   const filteredSymbols = symbols.filter(
     (s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.file_path.toLowerCase().includes(searchQuery.toLowerCase())
+      (s.file_path && s.file_path.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (s.file && s.file.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (

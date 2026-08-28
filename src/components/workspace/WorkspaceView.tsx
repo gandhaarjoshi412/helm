@@ -22,6 +22,12 @@ import { ApprovalDialog } from "./ApprovalDialog";
 import { NewProjectModal } from "./NewProjectModal";
 import { AuthModal } from "@/components/auth-modal";
 
+import { CodebaseIndexView } from "./views/CodebaseIndexView";
+import { PermissionsView } from "./views/PermissionsView";
+import { MemoryBankView } from "./views/MemoryBankView";
+import { VectorStoreView } from "./views/VectorStoreView";
+import { SystemLogsView } from "./views/SystemLogsView";
+
 import {
   FileCode2,
   Network,
@@ -43,6 +49,7 @@ export function WorkspaceView() {
     selectedProject,
     setSelectedProject,
     addProject,
+    removeProject,
     reloadProjects,
   } = useProjects();
 
@@ -152,6 +159,9 @@ export function WorkspaceView() {
         projects={projects}
         selectedProject={selectedProject}
         onSelectProject={setSelectedProject}
+        onDeleteProject={async (p) => {
+          await removeProject(p.id);
+        }}
         onOpenNewProjectModal={() => {
           if (!user) {
             setIsAuthModalOpen(true);
@@ -218,6 +228,28 @@ export function WorkspaceView() {
                 </div>
               </div>
             </motion.div>
+          ) : sidebarTab === "codebase" ? (
+            <CodebaseIndexView
+              projectId={selectedProject?.id}
+              projectName={selectedProject?.name}
+            />
+          ) : sidebarTab === "permissions" ? (
+            <PermissionsView
+              projectId={selectedProject?.id}
+              projectName={selectedProject?.name}
+            />
+          ) : sidebarTab === "memory" ? (
+            <MemoryBankView
+              projectId={selectedProject?.id}
+              projectName={selectedProject?.name}
+            />
+          ) : sidebarTab === "vector" ? (
+            <VectorStoreView
+              projectId={selectedProject?.id}
+              projectName={selectedProject?.name}
+            />
+          ) : sidebarTab === "logs" ? (
+            <SystemLogsView />
           ) : (
             <>
               {/* Task Dispatch Console Bar */}

@@ -243,6 +243,12 @@ export async function fetchTaskDiff(taskId: string): Promise<string> {
   return res.diff || "";
 }
 
+export async function deleteProject(id: string): Promise<void> {
+  return request<void>(`/api/projects/${id}`, {
+    method: "DELETE",
+  });
+}
+
 // ----------------------------------------------------
 // AST Code Graph & Context API
 // ----------------------------------------------------
@@ -258,4 +264,68 @@ export async function fetchSymbols(projectId: string, query?: string): Promise<S
 
 export async function searchSymbols(projectId: string, query: string): Promise<SymbolInfo[]> {
   return fetchSymbols(projectId, query);
+}
+
+export async function syncProjectCodebase(projectId: string): Promise<{ status: string; nodes_indexed: number; edges_indexed: number }> {
+  return request<{ status: string; nodes_indexed: number; edges_indexed: number }>(`/api/projects/${projectId}/sync`, {
+    method: "POST",
+  });
+}
+
+export async function fetchProjectMemory(projectId: string): Promise<{
+  project_id: string;
+  project_name: string;
+  total_memories: number;
+  memories: Array<{ id: string; category: string; title: string; content: string; created_at: string; tags: string[] }>;
+}> {
+  return request(`/api/projects/${projectId}/memory`);
+}
+
+export async function fetchVectorStoreInfo(projectId: string): Promise<{
+  project_id: string;
+  embedding_model: string;
+  dimensions: number;
+  chunk_size: number;
+  total_indexed_files: number;
+  total_vector_chunks: number;
+  vector_db: string;
+  sample_chunks: Array<{ id: string; file: string; tokens: number; dimension: number; similarity_score: number }>;
+}> {
+  return request(`/api/projects/${projectId}/vector`);
+}
+
+export async function fetchProjectPermissions(projectId: string): Promise<{
+  allow_bash: boolean;
+  allow_file_writes: boolean;
+  allow_dependency_install: boolean;
+  allow_network_egress: boolean;
+  autonomy_level: string;
+  isolation_type: string;
+}> {
+  return request(`/api/projects/${projectId}/permissions`);
+}
+
+export async function updateProjectPermissions(projectId: string, policy: {
+  allow_bash: boolean;
+  allow_file_writes: boolean;
+  allow_dependency_install: boolean;
+  allow_network_egress: boolean;
+  autonomy_level: string;
+  isolation_type: string;
+}): Promise<{ status: string; policy: any }> {
+  return request(`/api/projects/${projectId}/permissions`, {
+    method: "POST",
+    body: JSON.stringify(policy),
+  });
+}
+
+export async function fetchSystemLogs(level?: string): Promise<Array<{
+  id: string;
+  level: string;
+  component: string;
+  message: string;
+  timestamp: string;
+}>> {
+  const q = level ? `?level=${encodeURIComponent(level)}` : "";
+  return request(`/api/system/logs${q}`);
 }
