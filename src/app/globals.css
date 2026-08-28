@@ -3,17 +3,25 @@
 
 :root {
   --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-mono: var(--font-jakarta), 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
-body {
-  font-family: var(--font-sans);
+html,
+body,
+button,
+input,
+select,
+textarea,
+h1, h2, h3, h4, h5, h6,
+.font-mono,
+.font-sans {
+  font-family: var(--font-sans) !important;
 }
 
 code,
 pre,
-.font-mono {
-  font-family: var(--font-mono);
+.raw-code-block {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', ui-monospace, monospace !important;
 }
 
 @layer base {
