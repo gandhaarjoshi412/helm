@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AgentEvent, PhaseName } from "@/types/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const API_KEY = process.env.NEXT_PUBLIC_HELM_API_KEY || "";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://iqoo.platesight.in";
+const API_KEY = process.env.NEXT_PUBLIC_HELM_API_KEY || "helm_sec_0e771d48fb960d8a3581974c259881669c02a36a53b72382";
 
 export interface TaskStreamState {
   events: AgentEvent[];
