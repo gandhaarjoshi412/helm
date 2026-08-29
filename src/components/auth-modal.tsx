@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { KodiumMark } from "./ui/kodium-mark";
 import { Button } from "./ui/button";
-import { GithubIcon } from "./ui/icons";
 import { useAuth } from "@/context/auth-context";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -48,7 +47,7 @@ export function AuthModal({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const { signInWithEmail, signUpWithEmail, signInWithMagicLink, signInWithGithub } = useAuth();
+  const { signInWithEmail, signUpWithEmail, signInWithMagicLink } = useAuth();
 
   if (!isOpen) return null;
 
@@ -119,23 +118,6 @@ export function AuthModal({
       }
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : "An error occurred during authentication.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGithubLogin = async () => {
-    setErrorMsg(null);
-    setLoading(true);
-    try {
-      const { error } = await signInWithGithub();
-      if (error) {
-        setErrorMsg(error.message);
-      } else {
-        setSuccessMsg("Redirecting to GitHub OAuth...");
-      }
-    } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "GitHub OAuth failed.");
     } finally {
       setLoading(false);
     }
@@ -288,27 +270,6 @@ export function AuthModal({
                 ? "Enter your personal data to create your account."
                 : "Welcome back! Access your developer command center."}
             </p>
-          </div>
-
-          {/* GitHub OAuth Button */}
-          <button
-            type="button"
-            onClick={handleGithubLogin}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-white/[0.07] hover:bg-white/[0.14] border border-white/20 hover:border-white/40 text-white font-medium text-xs sm:text-sm font-mono transition-all shadow-lg cursor-pointer disabled:opacity-50 group"
-          >
-            <GithubIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
-            <span>Continue with GitHub</span>
-          </button>
-
-          {/* Divider */}
-          <div className="relative flex items-center justify-center my-5">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.08]" />
-            </div>
-            <span className="relative px-3 bg-[#08090d] text-[10px] font-mono text-zinc-400 uppercase tracking-widest font-semibold">
-              or
-            </span>
           </div>
 
           {/* Auth Tabs */}
