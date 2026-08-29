@@ -14,28 +14,26 @@ interface CodebaseIndexViewProps {
 export function CodebaseIndexView({ projectId, projectName }: CodebaseIndexViewProps) {
   const [symbols, setSymbols] = useState<SymbolInfo[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(Boolean(projectId));
   const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState<"symbols" | "graph">("symbols");
 
-  const loadData = async () => {
-    if (!projectId) {
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const data = await fetchSymbols(projectId);
-      setSymbols(data);
-    } catch (err) {
-      console.error("Failed to load symbols:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadData();
+    if (!projectId) return;
+    let active = true;
+    fetchSymbols(projectId)
+      .then((data) => {
+        if (active) setSymbols(data);
+      })
+      .catch((err) => {
+        console.error("Failed to load symbols:", err);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [projectId]);
 
   const handleReindex = async () => {
@@ -43,7 +41,8 @@ export function CodebaseIndexView({ projectId, projectName }: CodebaseIndexViewP
     setIsSyncing(true);
     try {
       await syncProjectCodebase(projectId);
-      await loadData();
+      const data = await fetchSymbols(projectId);
+      setSymbols(data);
     } catch (err) {
       console.error("Re-index error:", err);
     } finally {

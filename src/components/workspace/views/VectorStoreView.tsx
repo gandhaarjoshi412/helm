@@ -9,28 +9,43 @@ interface VectorStoreViewProps {
   projectName?: string;
 }
 
+interface VectorChunk {
+  id: string;
+  file: string;
+  tokens: number;
+  dimension: number;
+  similarity_score: number;
+}
+
+interface VectorStoreData {
+  embedding_model?: string;
+  dimensions?: number;
+  total_indexed_files?: number;
+  total_vector_chunks?: number;
+  sample_chunks?: VectorChunk[];
+}
+
 export function VectorStoreView({ projectId, projectName }: VectorStoreViewProps) {
-  const [vectorData, setVectorData] = useState<any>(null);
+  const [vectorData, setVectorData] = useState<VectorStoreData | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(Boolean(projectId));
 
   useEffect(() => {
-    if (!projectId) {
-      setIsLoading(false);
-      return;
-    }
-    const load = async () => {
-      setIsLoading(true);
-      try {
-        const data = await fetchVectorStoreInfo(projectId);
-        setVectorData(data);
-      } catch (err) {
+    if (!projectId) return;
+    let active = true;
+    fetchVectorStoreInfo(projectId)
+      .then((data) => {
+        if (active) setVectorData(data);
+      })
+      .catch((err) => {
         console.error("Failed to load vector info:", err);
-      } finally {
-        setIsLoading(false);
-      }
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
     };
-    load();
   }, [projectId]);
 
   return (
@@ -88,7 +103,7 @@ export function VectorStoreView({ projectId, projectName }: VectorStoreViewProps
           </div>
         ) : (
           <div className="space-y-2">
-            {vectorData.sample_chunks.map((chunk: any) => (
+            {vectorData.sample_chunks.map((chunk: VectorChunk) => (
               <div
                 key={chunk.id}
                 className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all"

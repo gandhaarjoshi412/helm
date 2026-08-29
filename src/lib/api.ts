@@ -12,7 +12,7 @@ import {
 } from "@/types/api";
 import { createClient } from "@/lib/supabase/client";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const API_KEY = process.env.NEXT_PUBLIC_HELM_API_KEY || "";
 
 /**
@@ -312,7 +312,7 @@ export async function updateProjectPermissions(projectId: string, policy: {
   allow_network_egress: boolean;
   autonomy_level: string;
   isolation_type: string;
-}): Promise<{ status: string; policy: any }> {
+}): Promise<{ status: string; policy: Record<string, unknown> }> {
   return request(`/api/projects/${projectId}/permissions`, {
     method: "POST",
     body: JSON.stringify(policy),

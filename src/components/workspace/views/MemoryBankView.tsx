@@ -10,26 +10,25 @@ interface MemoryBankViewProps {
 }
 
 export function MemoryBankView({ projectId, projectName }: MemoryBankViewProps) {
-  const [memories, setMemories] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [memories, setMemories] = useState<Array<{ id: string; category: string; title: string; content: string; created_at: string; tags?: string[] }>>([]);
+  const [isLoading, setIsLoading] = useState(Boolean(projectId));
 
   useEffect(() => {
-    if (!projectId) {
-      setIsLoading(false);
-      return;
-    }
-    const load = async () => {
-      setIsLoading(true);
-      try {
-        const data = await fetchProjectMemory(projectId);
-        setMemories(data.memories || []);
-      } catch (err) {
+    if (!projectId) return;
+    let active = true;
+    fetchProjectMemory(projectId)
+      .then((data) => {
+        if (active) setMemories(data.memories || []);
+      })
+      .catch((err) => {
         console.error("Failed to load memories:", err);
-      } finally {
-        setIsLoading(false);
-      }
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
     };
-    load();
   }, [projectId]);
 
   return (

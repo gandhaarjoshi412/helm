@@ -10,7 +10,6 @@ import { createTask, cancelTask } from "@/lib/api";
 import { TaskMode, Task } from "@/types/api";
 
 import { WorkspaceHeader } from "./WorkspaceHeader";
-import { WorkspaceSidebar } from "./WorkspaceSidebar";
 import { InteractiveCycleProgress } from "./InteractiveCycleProgress";
 import { TaskDispatchBar } from "./TaskDispatchBar";
 import { PhaseProgression } from "./PhaseProgression";
@@ -57,10 +56,8 @@ export function WorkspaceView() {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isLaunching, setIsLaunching] = useState<boolean>(false);
   const [rightPanelTab, setRightPanelTab] = useState<"diff" | "graph">("diff");
-  const [sidebarTab, setSidebarTab] = useState<string>("agents");
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
   const [copiedAnswer, setCopiedAnswer] = useState<boolean>(false);
 
   React.useEffect(() => {
@@ -171,20 +168,10 @@ export function WorkspaceView() {
         }}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         isStreaming={streamState.isConnected && isTaskRunning}
-        onToggleMobileSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
       />
 
-      {/* Main Workspace Body with Fixed Sidebar + Scrollable Content */}
+      {/* Main Workspace Body with Scrollable Content */}
       <div className="flex flex-1 h-[calc(100vh-56px)] overflow-hidden relative">
-        {/* Left Side Navigation Bar */}
-        <WorkspaceSidebar
-          activeTab={sidebarTab}
-          onSelectTab={setSidebarTab}
-          mobileOpen={mobileSidebarOpen}
-          onCloseMobile={() => setMobileSidebarOpen(false)}
-          projectId={selectedProject?.id}
-        />
-
         {/* Central Command Center Content Area */}
         <main className="flex-1 overflow-y-auto p-2.5 sm:p-4 space-y-3 sm:space-y-4 bg-[#000000] tech-grid terminal-scroll">
           {!authLoading && !user ? (
@@ -228,28 +215,6 @@ export function WorkspaceView() {
                 </div>
               </div>
             </motion.div>
-          ) : sidebarTab === "codebase" ? (
-            <CodebaseIndexView
-              projectId={selectedProject?.id}
-              projectName={selectedProject?.name}
-            />
-          ) : sidebarTab === "permissions" ? (
-            <PermissionsView
-              projectId={selectedProject?.id}
-              projectName={selectedProject?.name}
-            />
-          ) : sidebarTab === "memory" ? (
-            <MemoryBankView
-              projectId={selectedProject?.id}
-              projectName={selectedProject?.name}
-            />
-          ) : sidebarTab === "vector" ? (
-            <VectorStoreView
-              projectId={selectedProject?.id}
-              projectName={selectedProject?.name}
-            />
-          ) : sidebarTab === "logs" ? (
-            <SystemLogsView />
           ) : (
             <>
               {/* Task Dispatch Console Bar */}

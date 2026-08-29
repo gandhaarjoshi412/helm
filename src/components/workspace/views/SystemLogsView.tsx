@@ -5,7 +5,7 @@ import { FileText, RefreshCw, Filter, Trash2, Download } from "lucide-react";
 import { fetchSystemLogs } from "@/lib/api";
 
 export function SystemLogsView() {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<Array<{ id: string; level: string; component: string; message: string; timestamp: string }>>([]);
   const [levelFilter, setLevelFilter] = useState("ALL");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -22,9 +22,32 @@ export function SystemLogsView() {
   };
 
   useEffect(() => {
-    loadLogs();
-    const timer = setInterval(loadLogs, 8000);
-    return () => clearInterval(timer);
+    let active = true;
+    fetchSystemLogs(levelFilter)
+      .then((data) => {
+        if (active) setLogs(data);
+      })
+      .catch((err) => {
+        console.error("Failed to load logs:", err);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    const timer = setInterval(() => {
+      fetchSystemLogs(levelFilter)
+        .then((data) => {
+          if (active) setLogs(data);
+        })
+        .catch((err) => {
+          console.error("Failed to load logs:", err);
+        });
+    }, 8000);
+
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
   }, [levelFilter]);
 
   const handleDownload = () => {

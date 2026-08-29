@@ -31,7 +31,6 @@ interface WorkspaceHeaderProps {
   onOpenAuthModal: () => void;
   onDeleteProject?: (p: Project) => Promise<void> | void;
   isStreaming?: boolean;
-  onToggleMobileSidebar?: () => void;
 }
 
 export function WorkspaceHeader({
@@ -42,13 +41,11 @@ export function WorkspaceHeader({
   onOpenAuthModal,
   onDeleteProject,
   isStreaming,
-  onToggleMobileSidebar,
 }: WorkspaceHeaderProps) {
   const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [activeTopTab, setActiveTopTab] = useState("systems");
   const { user, signOut } = useAuth();
 
   useEffect(() => {
@@ -76,18 +73,8 @@ export function WorkspaceHeader({
 
   return (
     <header className="h-14 border-b border-white/10 bg-[#000000]/95 backdrop-blur-xl px-2.5 sm:px-6 flex items-center justify-between z-40 sticky top-0 font-sans select-none">
-      {/* Left: Brand, Mobile Sidebar Toggle & Header Tabs */}
+      {/* Left: Brand & Home Link */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {onToggleMobileSidebar && (
-          <button
-            onClick={onToggleMobileSidebar}
-            className="md:hidden text-zinc-400 hover:text-white p-2 rounded-lg bg-white/5 border border-white/10 cursor-pointer"
-            aria-label="Open sidebar"
-          >
-            <Menu className="w-4 h-4" />
-          </button>
-        )}
-
         <Link
           href="/"
           className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border border-white/10 shrink-0"
@@ -102,29 +89,6 @@ export function WorkspaceHeader({
           <span className="font-bold text-xs sm:text-sm tracking-tight text-white font-sans">
             KODIUM <span className="text-zinc-400 font-normal hidden sm:inline">/ HELM CONSOLE</span>
           </span>
-        </div>
-
-        {/* Top Navigation Tabs */}
-        <div className="hidden lg:flex gap-1 pl-3">
-          {[
-            { id: "systems", label: "Systems" },
-            { id: "pipeline", label: "Pipeline" },
-            { id: "security", label: "Security" },
-            { id: "telemetry", label: "Telemetry" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTopTab(tab.id)}
-              className={cn(
-                "text-xs font-medium px-3 py-1 rounded-lg transition-all cursor-pointer",
-                activeTopTab === tab.id
-                  ? "text-white bg-white/10 border border-white/20 font-semibold"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5"
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
         </div>
       </div>
 

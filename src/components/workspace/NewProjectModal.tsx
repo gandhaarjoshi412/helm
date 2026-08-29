@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { KodiumMark } from "../ui/kodium-mark";
 import { motion, AnimatePresence } from "framer-motion";
-import { createProject, createProjectWithFiles } from "@/lib/api";
+import { useProjects } from "@/hooks/use-projects";
 
 interface NewProjectModalProps {
   isOpen: boolean;
@@ -45,8 +45,7 @@ async function getFilesFromDirectoryHandle(
     ".pytest_cache",
   ]);
 
-  // @ts-ignore
-  for await (const entry of dirHandle.values()) {
+  for await (const entry of (dirHandle as unknown as { values: () => AsyncIterable<FileSystemHandle> }).values()) {
     if (IGNORED.has(entry.name) || (entry.name.startsWith(".") && entry.name !== ".env.example")) {
       continue;
     }
@@ -69,6 +68,7 @@ export function NewProjectModal({
   onClose,
   onSuccess,
 }: NewProjectModalProps) {
+  const { addProject, addProjectWithFiles } = useProjects();
   const [activeTab, setActiveTab] = useState<TabType>("local");
   const [name, setName] = useState<string>("");
   const [gitUrl, setGitUrl] = useState<string>("");
@@ -86,8 +86,7 @@ export function NewProjectModal({
     setError(null);
     try {
       if ("showDirectoryPicker" in window) {
-        // @ts-ignore
-        const dirHandle: FileSystemDirectoryHandle = await window.showDirectoryPicker();
+        const dirHandle: FileSystemDirectoryHandle = await (window as unknown as { showDirectoryPicker: () => Promise<FileSystemDirectoryHandle> }).showDirectoryPicker();
         if (dirHandle?.name) {
           setSelectedFolderName(dirHandle.name);
           if (!name.trim()) setName(dirHandle.name);
@@ -146,26 +145,17 @@ export function NewProjectModal({
     try {
       if (activeTab === "local") {
         if (localFiles.length > 0) {
-          await createProjectWithFiles(name.trim(), localFiles, gitUrl.trim() || undefined);
+          await addProjectWithFiles(name.trim(), localFiles, gitUrl.trim() || undefined);
         } else {
-          await createProject({
-            name: name.trim(),
-            git_url: gitUrl.trim() || undefined,
-          });
+          await addProject(name.trim(), undefined, gitUrl.trim() || undefined);
         }
       } else if (activeTab === "git") {
         if (!gitUrl.trim()) {
           throw new Error("Please enter a valid Git Repository URL.");
         }
-        await createProject({
-          name: name.trim(),
-          git_url: gitUrl.trim(),
-        });
+        await addProject(name.trim(), undefined, gitUrl.trim());
       } else if (activeTab === "template") {
-        await createProject({
-          name: name.trim(),
-          description: `Created from ${template} starter template`,
-        });
+        await addProject(name.trim());
       }
 
       onSuccess();
@@ -193,7 +183,7 @@ export function NewProjectModal({
         <input
           type="file"
           ref={fileInputRef}
-          // @ts-ignore
+          // @ts-expect-error Non-standard webkit directory attributes
           webkitdirectory="true"
           directory="true"
           className="hidden"

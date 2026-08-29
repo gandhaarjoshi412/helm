@@ -18,27 +18,26 @@ export function PermissionsView({ projectId, projectName }: PermissionsViewProps
     autonomy_level: "guided",
     isolation_type: "sandboxed_process",
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(Boolean(projectId));
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   useEffect(() => {
-    if (!projectId) {
-      setIsLoading(false);
-      return;
-    }
-    const load = async () => {
-      setIsLoading(true);
-      try {
-        const data = await fetchProjectPermissions(projectId);
-        setPolicy(data);
-      } catch (err) {
+    if (!projectId) return;
+    let active = true;
+    fetchProjectPermissions(projectId)
+      .then((data) => {
+        if (active && data) setPolicy(data);
+      })
+      .catch((err) => {
         console.error("Failed to load permissions:", err);
-      } finally {
-        setIsLoading(false);
-      }
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
     };
-    load();
   }, [projectId]);
 
   const handleSave = async () => {
@@ -56,7 +55,6 @@ export function PermissionsView({ projectId, projectName }: PermissionsViewProps
   };
 
   const toggle = (key: keyof typeof policy) => {
-    // @ts-ignore
     setPolicy((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -128,13 +126,12 @@ export function PermissionsView({ projectId, projectName }: PermissionsViewProps
             { key: "allow_network_egress", label: "Outbound Network Access", desc: "Allows agent to perform web requests or API calls outside the sandbox.", icon: Globe },
           ].map((item) => {
             const Icon = item.icon;
-            // @ts-ignore
-            const isEnabled = Boolean(policy[item.key]);
+            const isEnabled = Boolean(policy[item.key as keyof typeof policy]);
 
             return (
               <div
                 key={item.key}
-                onClick={() => toggle(item.key as any)}
+                onClick={() => toggle(item.key as keyof typeof policy)}
                 className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-3">
