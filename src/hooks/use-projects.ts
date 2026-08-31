@@ -91,39 +91,20 @@ export function useProjects() {
 
   const addProject = async (name: string, repoPath?: string, gitUrl?: string) => {
     try {
-      let taggedProj: Project;
-      try {
-        const newProj = await createProject({
-          name,
-          repo_path: repoPath,
-          git_url: gitUrl,
-        });
+      const newProj = await createProject({
+        name,
+        repo_path: repoPath,
+        git_url: gitUrl,
+      });
 
-        taggedProj = {
-          ...newProj,
-          metadata: {
-            ...(newProj.metadata || {}),
-            user_id: user?.id,
-            created_by: user?.email,
-          },
-        };
-      } catch (_backendErr) {
-        // Backend offline or unreachable fallback
-        taggedProj = {
-          id: `proj_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          name,
-          repo_path: repoPath || `/sandboxes/${name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
-          git_url: gitUrl,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          status: "ready",
-          metadata: {
-            user_id: user?.id,
-            created_by: user?.email,
-            offline_fallback: true,
-          },
-        };
-      }
+      const taggedProj: Project = {
+        ...newProj,
+        metadata: {
+          ...(newProj.metadata || {}),
+          user_id: user?.id,
+          created_by: user?.email,
+        },
+      };
 
       saveUploadedProjectForUser(userKey, taggedProj);
       setProjects((prev) => [taggedProj, ...prev.filter((p) => p.id !== taggedProj.id)]);
@@ -140,37 +121,17 @@ export function useProjects() {
     gitUrl?: string
   ) => {
     try {
-      let taggedProj: Project;
-      try {
-        const { createProjectWithFiles } = await import("@/lib/api");
-        const newProj = await createProjectWithFiles(name, files, gitUrl);
+      const { createProjectWithFiles } = await import("@/lib/api");
+      const newProj = await createProjectWithFiles(name, files, gitUrl);
 
-        taggedProj = {
-          ...newProj,
-          metadata: {
-            ...(newProj.metadata || {}),
-            user_id: user?.id,
-            created_by: user?.email,
-          },
-        };
-      } catch (_backendErr) {
-        // Backend offline or unreachable fallback
-        taggedProj = {
-          id: `proj_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          name,
-          repo_path: `/sandboxes/${name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
-          git_url: gitUrl,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          status: "ready",
-          metadata: {
-            user_id: user?.id,
-            created_by: user?.email,
-            files_count: files.length,
-            offline_fallback: true,
-          },
-        };
-      }
+      const taggedProj: Project = {
+        ...newProj,
+        metadata: {
+          ...(newProj.metadata || {}),
+          user_id: user?.id,
+          created_by: user?.email,
+        },
+      };
 
       saveUploadedProjectForUser(userKey, taggedProj);
       setProjects((prev) => [taggedProj, ...prev.filter((p) => p.id !== taggedProj.id)]);

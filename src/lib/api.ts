@@ -12,20 +12,7 @@ import {
 } from "@/types/api";
 import { createClient } from "@/lib/supabase/client";
 
-function getApiBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-  if (typeof window !== "undefined") {
-    const host = window.location.hostname;
-    // On production domain (e.g. kodium.platesight.in), do not attempt http://localhost:8000 which triggers browser HTTPS mixed-content block
-    if (host !== "localhost" && host !== "127.0.0.1") {
-      return "";
-    }
-  }
-  return "http://localhost:8000";
-}
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const API_KEY = process.env.NEXT_PUBLIC_HELM_API_KEY || "";
 
 /**
@@ -58,8 +45,7 @@ async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const baseUrl = getApiBaseUrl();
-  const url = `${baseUrl}${endpoint}`;
+  const url = `${API_BASE_URL}${endpoint}`;
   const authToken = await getAuthToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -120,11 +106,7 @@ export async function fetchSystemMetrics(projectId?: string): Promise<SystemMetr
 // ----------------------------------------------------
 
 export async function fetchProjects(): Promise<Project[]> {
-  try {
-    return await request<Project[]>("/api/projects");
-  } catch (_err) {
-    return [];
-  }
+  return request<Project[]>("/api/projects");
 }
 
 export async function fetchProject(id: string): Promise<Project> {
@@ -138,26 +120,10 @@ export async function createProject(payload: {
   default_branch?: string;
   description?: string;
 }): Promise<Project> {
-  try {
-    return await request<Project>("/api/projects", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    console.warn("[API Warning] createProject failed, synthesizing project for hosted environment:", err);
-    return {
-      id: `proj_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      name: payload.name,
-      repo_path: payload.repo_path || `/sandboxes/${payload.name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
-      git_url: payload.git_url,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      status: "ready",
-      metadata: {
-        offline_fallback: true,
-      },
-    };
-  }
+  return request<Project>("/api/projects", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function createProjectWithFiles(
@@ -165,52 +131,43 @@ export async function createProjectWithFiles(
   files: { file: File; relativePath: string }[],
   gitUrl?: string
 ): Promise<Project> {
-  try {
-    const baseUrl = getApiBaseUrl();
-    const url = `${baseUrl}/api/projects/upload`;
-    const authToken = await getAuthToken();
-    const formData = new FormData();
-    formData.append("name", name);
-    if (gitUrl) formData.append("git_url", gitUrl);
+  const url = `${API_BASE_URL}/api/projects/upload`;
+  const authToken = await getAuthToken();
+  const formData = new FormData();
+  formData.append("name", name);
+  if (gitUrl) formData.append("git_url", gitUrl);
 
-    const pathMap: string[] = [];
-    files.forEach((f) => {
-      formData.append("files", f.file);
-      pathMap.push(f.relativePath);
-    });
-    formData.append("paths", JSON.stringify(pathMap));
+  const pathMap: string[] = [];
+  files.forEach((f) => {
+    formData.append("files", f.file);
+    pathMap.push(f.relativePath);
+  });
+  formData.append("paths", JSON.stringify(pathMap));
 
-    const headers: Record<string, string> = {
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : (API_KEY ? { "X-API-Key": API_KEY } : {})),
-    };
+  const headers: Record<string, string> = {
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : (API_KEY ? { "X-API-Key": API_KEY } : {})),
+  };
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers,
-      body: formData,
-    });
+  const res = await fetch(url, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
 
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    let errorMessage = `HTTP ${res.status} ${res.statusText}`;
+    try {
+      const errorData = await res.json();
+      if (errorData?.detail) {
+        errorMessage = typeof errorData.detail === "string" ? errorData.detail : JSON.stringify(errorData.detail);
+      }
+    } catch {
+      // Fallback
     }
-
-    return (await res.json()) as Project;
-  } catch (err) {
-    console.warn("[API Warning] createProjectWithFiles failed, synthesizing project for hosted environment:", err);
-    return {
-      id: `proj_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      name,
-      repo_path: `/sandboxes/${name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
-      git_url: gitUrl,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      status: "ready",
-      metadata: {
-        files_count: files.length,
-        offline_fallback: true,
-      },
-    };
+    throw new Error(errorMessage);
   }
+
+  return (await res.json()) as Project;
 }
 
 // ----------------------------------------------------

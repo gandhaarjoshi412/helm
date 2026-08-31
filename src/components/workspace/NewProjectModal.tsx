@@ -161,13 +161,7 @@ export function NewProjectModal({
       onSuccess();
       onClose();
     } catch (err) {
-      if (err instanceof Error && err.message.includes("Please enter a valid")) {
-        setError(err.message);
-      } else {
-        // Guarantee successful workspace entry even on strict browser CORS / network restrictions
-        onSuccess();
-        onClose();
-      }
+      setError(err instanceof Error ? err.message : "Failed to create project");
     } finally {
       setIsLoading(false);
     }
