@@ -16,23 +16,23 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const API_KEY = process.env.NEXT_PUBLIC_HELM_API_KEY || "";
 
 /**
- * Retrieves active Supabase access token or local developer session token
+ * Retrieves active access token from developer session or Supabase session
  */
 export async function getAuthToken(): Promise<string> {
   if (typeof window === "undefined") return "";
   try {
-    const supabase = createClient();
-    if (supabase) {
-      const { data } = await supabase.auth.getSession();
-      if (data?.session?.access_token) {
-        return data.session.access_token;
-      }
-    }
     const stored = localStorage.getItem("kodium_developer_session");
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed?.session?.access_token) {
         return parsed.session.access_token;
+      }
+    }
+    const supabase = createClient();
+    if (supabase) {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session?.access_token) {
+        return data.session.access_token;
       }
     }
   } catch (_e) {
@@ -49,7 +49,8 @@ async function request<T>(
   const authToken = await getAuthToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(authToken ? { Authorization: `Bearer ${authToken}` } : (API_KEY ? { "X-API-Key": API_KEY } : {})),
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    ...(API_KEY ? { "X-API-Key": API_KEY } : {}),
     ...((options.headers as Record<string, string>) || {}),
   };
 
@@ -145,7 +146,8 @@ export async function createProjectWithFiles(
   formData.append("paths", JSON.stringify(pathMap));
 
   const headers: Record<string, string> = {
-    ...(authToken ? { Authorization: `Bearer ${authToken}` } : (API_KEY ? { "X-API-Key": API_KEY } : {})),
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    ...(API_KEY ? { "X-API-Key": API_KEY } : {}),
   };
 
   const res = await fetch(url, {
@@ -158,7 +160,9 @@ export async function createProjectWithFiles(
     let errorMessage = `HTTP ${res.status} ${res.statusText}`;
     try {
       const errorData = await res.json();
-      if (errorData?.detail) {
+      if (errorData?.error?.message) {
+        errorMessage = errorData.error.message;
+      } else if (errorData?.detail) {
         errorMessage = typeof errorData.detail === "string" ? errorData.detail : JSON.stringify(errorData.detail);
       }
     } catch {

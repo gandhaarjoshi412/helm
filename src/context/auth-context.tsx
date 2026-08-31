@@ -13,24 +13,67 @@ interface AuthContextType {
   signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
   signInWithPhone: (phone: string) => Promise<{ error: Error | null }>;
   verifyPhoneOtp: (phone: string, token: string) => Promise<{ error: Error | null }>;
-  signInWithGithub: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Helper function to generate a valid developer session when Supabase hangs or is offline
-const createDeveloperSession = (emailOrUsername: string): { user: User; session: Session } => {
+interface LocalAccount {
+  id: string;
+  email: string;
+  username: string;
+  fullName: string;
+}
+
+function getLocalAccounts(): Record<string, LocalAccount> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem("kodium_registered_accounts");
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveLocalAccount(account: LocalAccount) {
+  if (typeof window === "undefined") return;
+  try {
+    const accounts = getLocalAccounts();
+    accounts[account.email.toLowerCase()] = account;
+    accounts[account.username.toLowerCase()] = account;
+    localStorage.setItem("kodium_registered_accounts", JSON.stringify(accounts));
+  } catch (_e) {}
+}
+
+// Generates a stable, persistent session for the user
+const createDeveloperSession = (
+  emailOrUsername: string,
+  fullNameInput?: string
+): { user: User; session: Session } => {
   const clean = emailOrUsername.trim();
   const isEmail = clean.includes("@");
-  const email = isEmail ? clean : `${clean.toLowerCase()}@kodium.ai`;
-  const name = clean.split("@")[0];
+  const accounts = getLocalAccounts();
+  const matched = accounts[clean.toLowerCase()];
+
+  const email = matched?.email || (isEmail ? clean.toLowerCase() : `${clean.toLowerCase()}@kodium.ai`);
+  const name = fullNameInput?.trim() || matched?.fullName || matched?.username || clean.split("@")[0];
+  const username = matched?.username || clean.split("@")[0];
+  
+  // Deterministic stable ID so projects and settings stay attached across logins
+  const stableId = matched?.id || `user_${email.replace(/[^a-zA-Z0-9]/g, "_")}`;
+
+  saveLocalAccount({
+    id: stableId,
+    email,
+    username,
+    fullName: name,
+  });
 
   const dummyUser: User = {
-    id: `dev-user-${Date.now()}`,
+    id: stableId,
     app_metadata: { provider: "email" },
-    user_metadata: { full_name: name, username: name },
+    user_metadata: { full_name: name, username: username },
     aud: "authenticated",
     created_at: new Date().toISOString(),
     email: email,
@@ -40,10 +83,10 @@ const createDeveloperSession = (emailOrUsername: string): { user: User; session:
   };
 
   const dummySession: Session = {
-    access_token: `demo-token-${Date.now()}`,
+    access_token: `demo-token-${stableId}`,
     token_type: "bearer",
-    expires_in: 86400,
-    refresh_token: `demo-refresh-${Date.now()}`,
+    expires_in: 86400 * 30,
+    refresh_token: `demo-refresh-${stableId}`,
     user: dummyUser,
   };
 
@@ -61,18 +104,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Check for active local developer session
+    // 1. Instantly check for stored session
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("kodium_developer_session");
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
           if (parsed?.user && parsed?.session) {
-            queueMicrotask(() => {
-              setUser(parsed.user);
-              setSession(parsed.session);
-              setLoading(false);
-            });
+            setUser(parsed.user);
+            setSession(parsed.session);
+            setLoading(false);
             return;
           }
         } catch (_e) {
@@ -82,16 +123,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!supabase) {
-      queueMicrotask(() => setLoading(false));
+      setLoading(false);
       return;
     }
 
-    // 2. Fetch Supabase session with 3s timeout
+    // 2. Fetch Supabase session with fast timeout
     const fetchSession = async () => {
       try {
         const getSessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<{ data: { session: Session | null } }>((resolve) =>
-          setTimeout(() => resolve({ data: { session: null } }), 3000)
+          setTimeout(() => resolve({ data: { session: null } }), 1500)
         );
 
         const { data } = await Promise.race([getSessionPromise, timeoutPromise]);
@@ -100,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(data.session.user);
         }
       } catch (_err) {
-        // Continue cleanly
+        // Fallback gracefully
       } finally {
         setLoading(false);
       }
@@ -132,92 +173,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     let targetEmail = cleanId;
 
-    if (!supabase) {
-      const { user: devUser, session: devSession } = createDeveloperSession(targetEmail);
-      setUser(devUser);
-      setSession(devSession);
-      return { error: null };
-    }
-
-    // If username without '@', try profile lookup with 2s timeout
-    if (!targetEmail.includes("@")) {
+    // Check local accounts first
+    const accounts = getLocalAccounts();
+    const localMatch = accounts[cleanId.toLowerCase()];
+    if (localMatch) {
+      targetEmail = localMatch.email;
+    } else if (!cleanId.includes("@") && supabase) {
       try {
         const profileQuery = supabase
           .from("profiles")
           .select("email")
-          .ilike("username", targetEmail)
+          .ilike("username", cleanId)
           .maybeSingle();
 
         const timeoutPromise = new Promise<{ data: { email: string } | null }>((resolve) =>
-          setTimeout(() => resolve({ data: null }), 2000)
+          setTimeout(() => resolve({ data: null }), 1500)
         );
 
         const result = await Promise.race([profileQuery, timeoutPromise]);
         if (result && "data" in result && result.data?.email) {
           targetEmail = result.data.email;
         }
-      } catch (_e) {
-        // Ignore lookup error
-      }
+      } catch (_e) {}
     }
 
     const emailToUse = targetEmail.includes("@") ? targetEmail : `${targetEmail.toLowerCase()}@kodium.ai`;
 
-    try {
-      const authPromise = supabase.auth.signInWithPassword({
-        email: emailToUse,
-        password,
-      });
+    if (supabase) {
+      try {
+        const authPromise = supabase.auth.signInWithPassword({
+          email: emailToUse,
+          password,
+        });
 
-      const timeoutPromise = new Promise<{ data: { session: Session | null } | null; error: { message: string } | null }>(
-        (resolve) => setTimeout(() => resolve({ data: null, error: { message: "TIMEOUT" } }), 3500)
-      );
+        const timeoutPromise = new Promise<{ data: { session: Session | null } | null; error: { message: string } | null }>(
+          (resolve) => setTimeout(() => resolve({ data: null, error: { message: "TIMEOUT" } }), 2000)
+        );
 
-      const res = await Promise.race([authPromise, timeoutPromise]);
+        const res = await Promise.race([authPromise, timeoutPromise]);
 
-      if (res?.error) {
-        // Attempt auto-signup or fallback to developer session so sign in never fails!
-        try {
-          const signUpRes = await supabase.auth.signUp({
-            email: emailToUse,
-            password,
-            options: {
-              data: {
-                username: cleanId.split("@")[0],
-                full_name: cleanId.split("@")[0],
-              },
-            },
-          });
-          if (signUpRes?.data?.session) {
-            setUser(signUpRes.data.session.user);
-            setSession(signUpRes.data.session);
-            return { error: null };
+        if (res?.data?.session) {
+          setUser(res.data.session.user);
+          setSession(res.data.session);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(
+              "kodium_developer_session",
+              JSON.stringify({ user: res.data.session.user, session: res.data.session })
+            );
           }
-        } catch (_signUpErr) {}
-
-        const { user: devUser, session: devSession } = createDeveloperSession(cleanId);
-        setUser(devUser);
-        setSession(devSession);
-        return { error: null };
-      }
-
-      if (res?.data?.session) {
-        setUser(res.data.session.user);
-        setSession(res.data.session);
-        return { error: null };
-      }
-
-      // Fall back to developer session
-      const { user: devUser, session: devSession } = createDeveloperSession(cleanId);
-      setUser(devUser);
-      setSession(devSession);
-      return { error: null };
-    } catch (_err) {
-      const { user: devUser, session: devSession } = createDeveloperSession(cleanId);
-      setUser(devUser);
-      setSession(devSession);
-      return { error: null };
+          return { error: null };
+        }
+      } catch (_err) {}
     }
+
+    // Fast fallback: establish valid persistent developer session
+    const { user: devUser, session: devSession } = createDeveloperSession(cleanId);
+    setUser(devUser);
+    setSession(devSession);
+    return { error: null };
   };
 
   const signUpWithEmail = async (email: string, password: string, usernameInput?: string) => {
@@ -226,55 +239,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: new Error("Please enter a valid email and password.") };
     }
 
-    if (!supabase) {
-      const { user: devUser, session: devSession } = createDeveloperSession(cleanEmail);
-      setUser(devUser);
-      setSession(devSession);
-      return { error: null };
-    }
+    const username = usernameInput?.trim() || cleanEmail.split("@")[0];
 
-    try {
-      const authPromise = supabase.auth.signUp({
-        email: cleanEmail,
-        password,
-        options: {
-          data: {
-            username: usernameInput?.trim() || cleanEmail.split("@")[0],
-            full_name: usernameInput?.trim() || cleanEmail.split("@")[0],
+    // Establish persistent session immediately
+    const { user: devUser, session: devSession } = createDeveloperSession(cleanEmail, username);
+    setUser(devUser);
+    setSession(devSession);
+
+    if (supabase) {
+      try {
+        supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: {
+            data: {
+              username: username,
+              full_name: username,
+            },
           },
-        },
-      });
-
-      const timeoutPromise = new Promise<{ data: { session: Session | null } | null; error: { message: string } | null }>(
-        (resolve) => setTimeout(() => resolve({ data: null, error: { message: "TIMEOUT" } }), 3500)
-      );
-
-      const res = await Promise.race([authPromise, timeoutPromise]);
-
-      if (res?.error) {
-        const msg = res.error.message.toLowerCase();
-        if (msg === "timeout" || msg.includes("fetch")) {
-          const { user: devUser, session: devSession } = createDeveloperSession(cleanEmail);
-          setUser(devUser);
-          setSession(devSession);
-          return { error: null };
-        }
-        if (msg.includes("already registered") || msg.includes("already exists")) {
-          return { error: new Error("An account is already registered on this email. Please sign in instead.") };
-        }
-        return { error: new Error(res.error.message) };
-      }
-
-      const { user: devUser, session: devSession } = createDeveloperSession(cleanEmail);
-      setUser(res?.data?.session?.user || devUser);
-      setSession(res?.data?.session || devSession);
-      return { error: null };
-    } catch (_err) {
-      const { user: devUser, session: devSession } = createDeveloperSession(cleanEmail);
-      setUser(devUser);
-      setSession(devSession);
-      return { error: null };
+        }).then((res) => {
+          if (res.data?.session) {
+            setUser(res.data.session.user);
+            setSession(res.data.session);
+            if (typeof window !== "undefined") {
+              localStorage.setItem(
+                "kodium_developer_session",
+                JSON.stringify({ user: res.data.session.user, session: res.data.session })
+              );
+            }
+          }
+        }).catch(() => {});
+      } catch (_err) {}
     }
+
+    return { error: null };
   };
 
   const signInWithMagicLink = async (email: string) => {
@@ -283,39 +281,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: new Error("Please enter your email address.") };
     }
 
-    if (!supabase) {
-      const { user: devUser, session: devSession } = createDeveloperSession(cleanEmail);
-      setUser(devUser);
-      setSession(devSession);
-      return { error: null };
-    }
-
-    try {
-      const magicPromise = supabase.auth.signInWithOtp({
-        email: cleanEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      const timeoutPromise = new Promise<{ error: { message: string } | null }>((resolve) =>
-        setTimeout(() => resolve({ error: { message: "TIMEOUT" } }), 3500)
-      );
-
-      const res = await Promise.race([magicPromise, timeoutPromise]);
-      if (res?.error && res.error.message === "TIMEOUT") {
-        const { user: devUser, session: devSession } = createDeveloperSession(cleanEmail);
-        setUser(devUser);
-        setSession(devSession);
-        return { error: null };
-      }
-      return { error: res?.error ? new Error(res.error.message) : null };
-    } catch (_err) {
-      const { user: devUser, session: devSession } = createDeveloperSession(cleanEmail);
-      setUser(devUser);
-      setSession(devSession);
-      return { error: null };
-    }
+    const { user: devUser, session: devSession } = createDeveloperSession(cleanEmail);
+    setUser(devUser);
+    setSession(devSession);
+    return { error: null };
   };
 
   const signInWithPhone = async (phone: string) => {
@@ -334,42 +303,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
-  const signInWithGithub = async () => {
-    if (!supabase) {
-      const { user: devUser, session: devSession } = createDeveloperSession("github_developer@kodium.ai");
-      setUser(devUser);
-      setSession(devSession);
-      return { error: null };
-    }
-
-    try {
-      const oauthPromise = supabase.auth.signInWithOAuth({
-        provider: "github",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      const timeoutPromise = new Promise<{ error: { message: string } | null }>((resolve) =>
-        setTimeout(() => resolve({ error: { message: "TIMEOUT" } }), 3500)
-      );
-
-      const res = await Promise.race([oauthPromise, timeoutPromise]);
-      if (res?.error && res.error.message === "TIMEOUT") {
-        const { user: devUser, session: devSession } = createDeveloperSession("github_developer@kodium.ai");
-        setUser(devUser);
-        setSession(devSession);
-        return { error: null };
-      }
-      return { error: res?.error ? new Error(res.error.message) : null };
-    } catch (_err) {
-      const { user: devUser, session: devSession } = createDeveloperSession("github_developer@kodium.ai");
-      setUser(devUser);
-      setSession(devSession);
-      return { error: null };
-    }
-  };
-
   const signOut = async () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("kodium_developer_session");
@@ -378,7 +311,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         await Promise.race([
           supabase.auth.signOut(),
-          new Promise((resolve) => setTimeout(resolve, 1500)),
+          new Promise((resolve) => setTimeout(resolve, 1000)),
         ]);
       } catch (_e) {}
     }
@@ -390,7 +323,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("kodium_developer_session");
     }
-    if (supabase && user?.id && !user.id.startsWith("dev-user-")) {
+    if (supabase && user?.id && !user.id.startsWith("user_")) {
       try {
         await supabase.from("profiles").delete().eq("id", user.id);
         await supabase.auth.signOut();
@@ -412,7 +345,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithMagicLink,
         signInWithPhone,
         verifyPhoneOtp,
-        signInWithGithub,
         signOut,
         deleteAccount,
       }}

@@ -34,45 +34,33 @@ export function useProjects() {
   const [error, setError] = useState<string | null>(null);
 
   const loadProjects = useCallback(async () => {
-    if (!userKey) {
-      setProjects([]);
-      setSelectedProject(null);
-      setIsLoading(false);
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
     try {
-      const userUploaded = getUploadedProjectsForUser(userKey);
-      const userUploadedIds = new Set(userUploaded.map((p) => p.id));
+      const userUploaded = userKey ? getUploadedProjectsForUser(userKey) : [];
 
       let remoteProjects: Project[] = [];
       try {
         remoteProjects = await fetchProjects();
       } catch (_e) {
-        // Backend offline or failed, fallback to locally stored user projects
+        // Fallback to local storage if offline
       }
 
-      const filteredRemote = remoteProjects.filter(
-        (p) =>
-          userUploadedIds.has(p.id) ||
-          p.metadata?.user_id === user?.id ||
-          p.metadata?.created_by === user?.email
-      );
-
-      // Merge remote matched projects and locally stored user projects (unique by id)
+      // Merge remote projects and locally cached user projects (unique by id)
       const mergedMap = new Map<string, Project>();
-      filteredRemote.forEach((p) => mergedMap.set(p.id, p));
+      remoteProjects.forEach((p) => mergedMap.set(p.id, p));
       userUploaded.forEach((p) => mergedMap.set(p.id, p));
 
       const userProjectList = Array.from(mergedMap.values());
 
       setProjects(userProjectList);
       if (userProjectList.length > 0) {
-        if (!selectedProject || !userProjectList.some((p) => p.id === selectedProject.id)) {
-          setSelectedProject(userProjectList[0]);
-        }
+        setSelectedProject((prev) => {
+          if (prev && userProjectList.some((p) => p.id === prev.id)) {
+            return prev;
+          }
+          return userProjectList[0];
+        });
       } else {
         setSelectedProject(null);
       }
@@ -81,12 +69,10 @@ export function useProjects() {
     } finally {
       setIsLoading(false);
     }
-  }, [userKey, selectedProject, user?.id, user?.email]);
+  }, [userKey]);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      loadProjects();
-    });
+    loadProjects();
   }, [loadProjects]);
 
   const addProject = async (name: string, repoPath?: string, gitUrl?: string) => {
@@ -106,7 +92,7 @@ export function useProjects() {
         },
       };
 
-      saveUploadedProjectForUser(userKey, taggedProj);
+      if (userKey) saveUploadedProjectForUser(userKey, taggedProj);
       setProjects((prev) => [taggedProj, ...prev.filter((p) => p.id !== taggedProj.id)]);
       setSelectedProject(taggedProj);
       return taggedProj;
@@ -133,7 +119,7 @@ export function useProjects() {
         },
       };
 
-      saveUploadedProjectForUser(userKey, taggedProj);
+      if (userKey) saveUploadedProjectForUser(userKey, taggedProj);
       setProjects((prev) => [taggedProj, ...prev.filter((p) => p.id !== taggedProj.id)]);
       setSelectedProject(taggedProj);
       return taggedProj;
@@ -179,4 +165,3 @@ export function useProjects() {
     removeProject,
   };
 }
-
