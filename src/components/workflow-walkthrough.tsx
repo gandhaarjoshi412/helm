@@ -148,8 +148,38 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
 export function WorkflowWalkthrough() {
   const [activeStep, setActiveStep] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [initSubStep, setInitSubStep] = useState<number>(0);
+  const [execSubStep, setExecSubStep] = useState<number>(1);
+  const [deploySubStep, setDeploySubStep] = useState<number>(3);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastScrollTime = useRef<number>(0);
+
+  // Auto-advance workspace initialization pipeline when viewing step 0
+  useEffect(() => {
+    if (activeStep !== 0) return;
+    const interval = setInterval(() => {
+      setInitSubStep((prev) => (prev + 1) % 4);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [activeStep]);
+
+  // Auto-advance execution pipeline when viewing step 6
+  useEffect(() => {
+    if (activeStep !== 6) return;
+    const interval = setInterval(() => {
+      setExecSubStep((prev) => (prev + 1) % 4);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [activeStep]);
+
+  // Auto-advance deployment pipeline when viewing step 10
+  useEffect(() => {
+    if (activeStep !== 10) return;
+    const interval = setInterval(() => {
+      setDeploySubStep((prev) => (prev + 1) % 4);
+    }, 1800);
+    return () => clearInterval(interval);
+  }, [activeStep]);
 
   // Scroll wheel step advancement
   useEffect(() => {
@@ -158,7 +188,7 @@ export function WorkflowWalkthrough() {
 
     const handleWheel = (e: WheelEvent) => {
       const now = Date.now();
-      // Throttle wheel scroll steps by 400ms to allow smooth reading
+      // Throttle wheel scroll steps by 350ms to allow smooth reading
       if (now - lastScrollTime.current < 350) return;
 
       if (e.deltaY > 20) {
@@ -432,7 +462,7 @@ export function WorkflowWalkthrough() {
                               <span>GitHub Repository Connection</span>
                             </div>
                             <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                              AUTHORIZED
+                              {initSubStep === 3 ? "AUTHORIZED" : "IN PROGRESS"}
                             </span>
                           </div>
 
@@ -449,20 +479,60 @@ export function WorkflowWalkthrough() {
                                 <GitBranch className="w-3.5 h-3.5 text-zinc-300" />
                                 <span>platesight / main</span>
                               </div>
-                              <div className="text-[11px] text-emerald-400 font-bold">Workspace Initialized</div>
+                              <div className="text-[11px] font-bold transition-colors">
+                                {initSubStep === 0 && <span className="text-amber-400">● Connecting OAuth Token...</span>}
+                                {initSubStep === 1 && <span className="text-sky-400">● Cloning 1,420 source files...</span>}
+                                {initSubStep === 2 && <span className="text-purple-400">● Indexing AST dependency tree...</span>}
+                                {initSubStep === 3 && <span className="text-emerald-400">✓ Workspace Initialized</span>}
+                              </div>
                             </div>
                           </div>
 
                           {/* Progression Pipeline */}
                           <div className="pt-4 border-t border-white/[0.06]">
-                            <div className="text-[10px] text-zinc-500 uppercase font-bold mb-3">
-                              WORKSPACE INITIALIZATION PIPELINE
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="text-[10px] text-zinc-500 uppercase font-bold">
+                                WORKSPACE INITIALIZATION PIPELINE
+                              </div>
+                              <div className="text-[10px] text-zinc-400 font-mono">
+                                {initSubStep === 0 && "Step 1/4: Connect"}
+                                {initSubStep === 1 && "Step 2/4: Clone"}
+                                {initSubStep === 2 && "Step 3/4: Analyze"}
+                                {initSubStep === 3 && "Step 4/4: Ready"}
+                              </div>
                             </div>
                             <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-bold">
-                              <div className="p-2 rounded bg-white text-zinc-950 font-bold">CONNECT</div>
-                              <div className="p-2 rounded bg-zinc-900 text-zinc-300 border border-white/10">CLONE</div>
-                              <div className="p-2 rounded bg-zinc-900 text-zinc-300 border border-white/10">ANALYZE</div>
-                              <div className="p-2 rounded bg-zinc-900 text-zinc-300 border border-white/10">READY</div>
+                              {[
+                                { label: "CONNECT", desc: "OAuth Sync" },
+                                { label: "CLONE", desc: "1,420 files" },
+                                { label: "ANALYZE", desc: "AST Indexed" },
+                                { label: "READY", desc: "Workspace Live" },
+                              ].map((pipe, idx) => {
+                                const isActive = initSubStep === idx;
+                                const isPast = initSubStep > idx;
+                                return (
+                                  <button
+                                    key={idx}
+                                    onClick={() => setInitSubStep(idx)}
+                                    className={cn(
+                                      "p-2 rounded font-bold cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-0.5 select-none",
+                                      isActive
+                                        ? "bg-white text-zinc-950 shadow-md scale-[1.02]"
+                                        : isPast
+                                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                        : "bg-zinc-900 text-zinc-500 border border-white/10 hover:border-white/20 hover:text-zinc-300"
+                                    )}
+                                  >
+                                    <div className="flex items-center gap-1">
+                                      {isPast && <Check className="w-3 h-3 text-emerald-400" />}
+                                      <span>{pipe.label}</span>
+                                    </div>
+                                    <span className={cn("text-[8.5px] font-normal opacity-80", isActive ? "text-zinc-700 font-bold" : isPast ? "text-emerald-500/80" : "text-zinc-600")}>
+                                      {pipe.desc}
+                                    </span>
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
@@ -706,10 +776,37 @@ export function WorkflowWalkthrough() {
 
                           {/* Progression pipeline */}
                           <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-bold">
-                            <div className="p-2 rounded bg-zinc-900 text-zinc-400 border border-white/5">PLAN</div>
-                            <div className="p-2 rounded bg-white text-zinc-950 font-bold">CODE</div>
-                            <div className="p-2 rounded bg-zinc-900 text-zinc-400 border border-white/5">TEST</div>
-                            <div className="p-2 rounded bg-zinc-900 text-zinc-400 border border-white/5">VERIFY</div>
+                            {[
+                              { label: "PLAN", desc: "Strategy" },
+                              { label: "CODE", desc: "AST Patch" },
+                              { label: "TEST", desc: "Sandbox" },
+                              { label: "VERIFY", desc: "Passed" },
+                            ].map((pipe, idx) => {
+                              const isActive = execSubStep === idx;
+                              const isPast = execSubStep > idx;
+                              return (
+                                <button
+                                  key={idx}
+                                  onClick={() => setExecSubStep(idx)}
+                                  className={cn(
+                                    "p-2 rounded font-bold cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-0.5 select-none",
+                                    isActive
+                                      ? "bg-white text-zinc-950 shadow-md scale-[1.02]"
+                                      : isPast
+                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                      : "bg-zinc-900 text-zinc-500 border border-white/5 hover:border-white/20 hover:text-zinc-300"
+                                  )}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    {isPast && <Check className="w-3 h-3 text-emerald-400" />}
+                                    <span>{pipe.label}</span>
+                                  </div>
+                                  <span className={cn("text-[8.5px] font-normal opacity-80", isActive ? "text-zinc-700 font-bold" : isPast ? "text-emerald-500/80" : "text-zinc-600")}>
+                                    {pipe.desc}
+                                  </span>
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -840,10 +937,37 @@ export function WorkflowWalkthrough() {
                           </div>
 
                           <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-bold">
-                            <div className="p-2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">BUILD ✓</div>
-                            <div className="p-2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">TESTS ✓</div>
-                            <div className="p-2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">CI ✓</div>
-                            <div className="p-2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">DEPLOYED ✓</div>
+                            {[
+                              { label: "BUILD", desc: "Bundle" },
+                              { label: "TESTS", desc: "Passed" },
+                              { label: "CI", desc: "Pass" },
+                              { label: "DEPLOYED", desc: "Live" },
+                            ].map((pipe, idx) => {
+                              const isActive = deploySubStep === idx;
+                              const isPast = deploySubStep > idx;
+                              return (
+                                <button
+                                  key={idx}
+                                  onClick={() => setDeploySubStep(idx)}
+                                  className={cn(
+                                    "p-2 rounded font-bold cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-0.5 select-none",
+                                    isActive
+                                      ? "bg-emerald-500 text-zinc-950 shadow-md scale-[1.02]"
+                                      : isPast
+                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                      : "bg-zinc-900 text-zinc-500 border border-white/10 hover:border-white/20 hover:text-zinc-300"
+                                  )}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    {(isPast || isActive) && <Check className="w-3 h-3 text-current" />}
+                                    <span>{pipe.label}</span>
+                                  </div>
+                                  <span className={cn("text-[8.5px] font-normal opacity-80", isActive ? "text-zinc-950 font-bold" : isPast ? "text-emerald-500/80" : "text-zinc-600")}>
+                                    {pipe.desc}
+                                  </span>
+                                </button>
+                              );
+                            })}
                           </div>
 
                           <div className="p-4 rounded-xl bg-black border border-white/20 text-center space-y-1">
